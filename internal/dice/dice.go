@@ -141,11 +141,20 @@ type Spec struct {
 	Value int // flat terms only
 }
 
-// Draw supplies raw die values: n dice of the given size.
-type Draw func(sides, n int) ([]int, error)
+// Drawer supplies raw die values: n dice of the given size. It is an interface
+// rather than a func so a draw can also carry per-term state.
+type Drawer interface {
+	Draw(sides, n int) ([]int, error)
+}
 
-// TermAware is implemented by draws that track which term they are feeding,
-// so client-supplied values stay aligned with the terms they were thrown for.
+// DrawFunc adapts a plain function to Drawer.
+type DrawFunc func(sides, n int) ([]int, error)
+
+// Draw implements Drawer.
+func (f DrawFunc) Draw(sides, n int) ([]int, error) { return f(sides, n) }
+
+// TermAware is implemented by draws that track which term they are feeding, so
+// client-supplied values stay aligned with the terms they were thrown for.
 type TermAware interface{ NextTerm() }
 
 func parseMods(raw string) Mods {
@@ -251,7 +260,7 @@ func Plan(specs []Spec) []PlanEntry {
 	return out
 }
 
-func rollTerm(count, sides int, mods Mods, draw Draw) ([]Die, error) {
+func rollTerm(count, sides int, mods Mods, draw Drawer) ([]Die, error) {
 	if count < 1 || count > MaxDice {
 		return nil, errf("dice count must be 1-%d", MaxDice)
 	}
@@ -259,7 +268,7 @@ func rollTerm(count, sides int, mods Mods, draw Draw) ([]Die, error) {
 		return nil, errf("die size must be 2-%d", MaxSides)
 	}
 
-	raw, err := draw(sides, count)
+	raw, err := draw.Draw(sides, count)
 	if err != nil {
 		return nil, err
 	}
@@ -276,7 +285,7 @@ func rollTerm(count, sides int, mods Mods, draw Draw) ([]Die, error) {
 	if ok {
 		for i := range dice {
 			if dice[i].Value <= threshold {
-				v, err := draw(sides, 1)
+				v, err := draw.Draw(sides, 1)
 				if err != nil {
 					return nil, err
 				}
@@ -301,7 +310,7 @@ func rollTerm(count, sides int, mods Mods, draw Draw) ([]Die, error) {
 					break
 				}
 				budget--
-				v, err := draw(sides, 1)
+				v, err := draw.Draw(sides, 1)
 				if err != nil {
 					return nil, err
 				}
@@ -377,9 +386,9 @@ func rollTerm(count, sides int, mods Mods, draw Draw) ([]Die, error) {
 }
 
 // Evaluate builds the result from specs, taking die values from draw.
-func Evaluate(specs []Spec, formula string, draw Draw) (*Result, error) {
+func Evaluate(specs []Spec, formula string, draw Drawer) (*Result, error) {
 	terms := make([]Term, 0, len(specs))
-	aware, _ := any(draw).(TermAware)
+	aware, _ := draw.(TermAware)
 	for _, spec := range specs {
 		if spec.Kind == "flat" {
 			terms = append(terms, Term{Sign: spec.Sign, Kind: "flat",

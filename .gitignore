@@ -6,3 +6,6 @@ data/
 # PyInstaller output
 build/
 dist/
+
+# cross-compiled binaries
+dist/

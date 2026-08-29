@@ -4,28 +4,42 @@ A LAN app for in-person 5e games. It runs on your PC; everyone at the table open
 their phone and gets a live character sheet, shared dice, the initiative order, and the
 party's stash. No accounts, no internet, no cloud — just your Wi-Fi.
 
-## Keeping it running (Linux)
+## Running it
 
-On the machine this was built on it's installed as a systemd **user** service, so it
-starts with the machine and comes straight back if it ever falls over. Windows works
-differently — see [Windows](#windows), where the app runs only while its window is open:
+One binary, no installer, no runtime to install first. Start it and the table is
+live; close it and the session is over. Nothing is left running in the background
+and there is nothing to uninstall.
 
 ```
-systemctl --user status dnd-companion     # is it up?
-systemctl --user restart dnd-companion    # after changing the code
-journalctl --user -u dnd-companion -f     # live log, including the join QR code
+./dnd-companion            # Linux / macOS
 ```
 
-Lingering is enabled for this account, which is what lets a user service run without
-anyone logged in — so it comes up at boot. If that ever gets turned off, put it back with
-`sudo loginctl enable-linger $USER`.
+On Windows, double-click **dnd-companion-windows-amd64.exe**. Either way you get a
+window with the join QR code in it, the DM console opens in your browser, and
+closing the window (or Ctrl-C) stops the server.
 
-Don't run `./run.sh` while the service is up: they'd both want port 8787. To watch it in
-a terminal instead, stop the service first with `systemctl --user stop dnd-companion`.
+That is deliberately the same on every platform. There is no service, no autostart
+and no background daemon anywhere — the app is up while you have it open.
+
+| flag | environment | what it does |
+| --- | --- | --- |
+| `-port` | `DND_PORT` | listen somewhere other than 8787 |
+| `-data` | `DND_DATA_DIR` | keep campaigns somewhere other than the default |
+| `-url` | `DND_URL` | override the address in the QR code |
+| `-no-open` | | don't open the DM console at startup |
+
+**Where campaigns live.** A `data/` folder sitting next to the binary wins, which is
+what makes a portable copy — app and campaigns in one folder — work when you move it
+to another machine. Otherwise they go to the per-user location: `%LOCALAPPDATA%\DnDCompanion`
+on Windows, `~/.local/share/DnDCompanion` on Linux, `~/Library/Application Support/DnDCompanion`
+on macOS. The startup banner always prints the exact path it chose.
+
+Campaign files are recorded by name rather than by full path, so a data folder can be
+copied between machines — and between Linux and Windows — and still opens.
 
 ## How a session goes
 
-1. **You start the server** with `./run.sh`. It prints a QR code and the join URL:
+1. **You start the app.** It prints a QR code and the join URL:
 
    ```
      Players join at:  http://192.168.171.132:8787
@@ -209,82 +223,71 @@ screen, marked with a blue edge. No banner fires on anyone's phone. Good for per
 failed.
 
 
-## Windows
+## Building
 
-Windows gets a different shape from the Linux box: not a service, just an app.
-Double-click **DnD Table Companion.exe** and a small window opens with the join
-QR code in it — that's what the players scan. Close the window and the server
-stops. Nothing is installed, nothing keeps running in the background, and there
-is nothing to uninstall afterwards.
+Go's cross-compiler does the whole matrix from whichever machine you happen to be
+sitting at. The SQLite driver is pure Go, so `CGO_ENABLED=0` holds and there is no
+C toolchain, no Windows machine and no CI runner in the loop:
 
-Campaigns are written to `%LOCALAPPDATA%\DnDCompanion\` rather than next to the
-executable, so the app runs from wherever it was downloaded to and a new build
-can replace the old one without touching anyone's game. The **Campaign files**
-button opens that folder; back up `campaigns\` and you've backed up the
-campaigns.
+```
+./build.sh          # windows, linux and macOS — amd64 and arm64 — into dist/
+go build ./cmd/dnd-companion    # just this machine
+go test ./...
+```
 
-### First launch
+A build takes about half a minute for all six targets and each binary is around 15MB
+with the web assets, fonts and 3D dice compiled in. `go:embed` puts them *inside* the
+executable, so there is no unpack directory, nothing to extract at startup, and no way
+for the app and its assets to get separated.
+
+### The tests are a translation of the Python
+
+This started as a Python app, and the two pieces most able to break quietly in a
+port — the dice expression parser and the 5e derived-stat maths — are pinned against
+it rather than rewritten by eye. `tools/gen_vectors.py` records what the Python
+actually did for 51 dice expressions and 15 character sheets into `testdata/`, and the
+Go tests replay them demanding identical output, down to the error strings.
+
+That caught two real bugs immediately. Python's `//` rounds toward negative infinity
+where Go's `/` truncates toward zero, so a Charisma of 3 has to give -4 and not -3 —
+and every modifier on every sheet runs through that division. And a dice term's printed
+label is built by walking its modifiers in written order, so they are an ordered slice
+here; a Go map would have shuffled `4d6r1kh3` at random.
+
+### Windows notes
 
 Two things get in the way once, and both are Windows being careful rather than
 anything being wrong.
 
-**SmartScreen** will say "Windows protected your PC", because the executable
-isn't code-signed — a certificate is a yearly expense a LAN dice roller doesn't
-justify. **More info → Run anyway.**
+**SmartScreen** will say "Windows protected your PC", because the executable isn't
+code-signed — a certificate is a yearly expense a LAN dice roller doesn't justify.
+**More info → Run anyway.**
 
-**The firewall prompt** matters more, and it's the one thing that will stop
-phones connecting. Windows asks whether to allow the app to communicate: tick
-**Private networks** and allow it. If that prompt gets dismissed or denied,
-phones fail to connect with no visible reason. The fix is to set the Wi-Fi
-network's profile to **Private** (Settings → Network & Internet → Wi-Fi → your
-network) and then re-allow the app under Windows Defender Firewall → *Allow an
-app through firewall*. A network marked **Public** blocks this no matter what
-the app asks for, and that is the single most common reason a LAN app "just
-doesn't work" on Windows.
+**The firewall prompt** matters more, and it's the one thing that will stop phones
+connecting. Windows asks whether to allow the app to communicate: tick **Private
+networks** and allow it. If that prompt is dismissed or denied, phones fail to connect
+with no visible reason. The fix is to set the Wi-Fi network's profile to **Private**
+(Settings → Network & Internet → Wi-Fi → your network) and then re-allow the app under
+Windows Defender Firewall → *Allow an app through firewall*. A network marked **Public**
+blocks this no matter what the app asks for, and that is the single most common reason
+a LAN app "just doesn't work" on Windows.
 
-### If the QR points somewhere unreachable
-
-The app finds its own address by asking the OS which interface reaches the
-internet. On a machine with Hyper-V, WSL, VirtualBox or a VPN installed, that
-can be a virtual adapter the phones can't see, and the QR then encodes an
-address that goes nowhere. Compare the address in the window against
-`ipconfig`, and if they disagree, say which one is right:
+**If the QR points somewhere unreachable**, the app has guessed the wrong adapter. It
+asks the OS which interface reaches the internet, and on a machine with Hyper-V, WSL,
+VirtualBox or a VPN that can be a virtual one the phones cannot see. Compare the
+address in the banner against `ipconfig`, and if they disagree, say which one is right:
 
 ```
-set DND_URL=http://192.168.1.42:8787
-"DnD Table Companion.exe"
+dnd-companion-windows-amd64.exe -url http://192.168.1.42:8787
 ```
-
-`DND_PORT` and `DND_DATA_DIR` work exactly as they do on Linux.
-
-### Building it
-
-PyInstaller cannot cross-compile, so the executable has to be built on Windows.
-`.github/workflows/build-windows.yml` does that on a hosted runner: run it from
-the Actions tab for a downloadable build, or push a `v*` tag to attach one to a
-release. It smoke-tests the bundle before publishing, which catches what this
-kind of packaging fails at most often — an asset or a uvicorn backend that never
-made it into the build, and would otherwise surface as a broken app at somebody
-else's table.
-
-On a Windows machine directly:
-
-```
-uv sync
-uv run --with pyinstaller pyinstaller --noconfirm packaging/dnd-companion.spec
-```
-
-From a checkout you don't need to build at all: `.\run.ps1` runs it from source,
-and `.\run.ps1 --window` opens the same window the built app uses.
 
 ## Notes
 
 - Everyone must be on the same Wi-Fi. If phones can't reach the PC, it's almost always
   the firewall: allow inbound TCP 8787.
-- Set `DND_PORT` to move the port, `DND_DATA_DIR` to move the database. Handout pictures
-  live next to it in `data/uploads/`, named by content hash.
-- Fonts, dice and every other asset are served from the machine itself, so the app looks
-  and behaves identically with the router unplugged from the internet.
+- Handout pictures live in `uploads/` inside the data folder, named by content hash.
+- Fonts, dice and every other asset are compiled into the binary and served from it, so
+  the app looks and behaves identically with the router unplugged from the internet.
 - Nothing here is locked. Anyone on your Wi-Fi with the URL can join as a player or open
   the DM console, and the dice are thrown on the phone rather than the server. That's the
   right trade for a living room and the wrong one for anywhere else — don't expose the
@@ -293,25 +296,28 @@ and `.\run.ps1 --window` opens the same window the built app uses.
 ## Layout
 
 ```
-server/
-  main.py    FastAPI app, HTTP routes, websocket ops, permission split
-  db.py      SQLite schema, the 5e sheet model, derived-stat maths
-  state.py   the JSON slices pushed to clients (DM and player variants)
-  dice.py    dice expression parser and roller
-  hub.py     websocket fan-out
-  paths.py   where data and bundled assets live, in a checkout and when frozen
-  desktop.py the window the Windows build opens in place of a terminal
-web/
+cmd/dnd-companion/   the executable: flags, then hand off to internal/app
+internal/
+  app/       lifecycle — find the data, serve, print the QR, stop cleanly
+  server/    HTTP routes, websocket ops, the permission split
+  store/     SQLite: the campaign registry, campaign files, accessors
+  state/     the JSON slices pushed to clients (DM and player variants)
+  sheet/     the 5e sheet model and derived-stat maths
+  dice/      dice expression parser and roller
+  hub/       websocket fan-out
+web/         compiled into the binary with go:embed
   index.html join screen        player.html  player app       dm.html  DM console
   js/sheet.js   the 5e sheet, shared by the player's view and the DM's
   js/dicebox.js wrapper around the vendored 3D dice tray
   js/dice3d.js  fallback dice renderer for devices without WebGL
   js/common.js  transport, DOM helpers, dice pad, roll log
-  fonts/        Cinzel + Alegreya Sans (SIL OFL), vendored to work offline
-vendor/dice-box/  @3d-dice/dice-box + its assets, vendored to work offline
   js/player.js  character sheet and player tabs
   js/dm.js      DM console
-packaging/  PyInstaller spec and entry point for the Windows executable
+  fonts/        Cinzel + Alegreya Sans (SIL OFL), vendored to work offline
+  vendor/dice-box/  @3d-dice/dice-box + its assets, vendored to work offline
+testdata/    golden vectors recorded from the original Python implementation
+tools/       the generator that produced them
+server/      the original Python implementation, kept as the reference
 ```
 
 State changes go one way: a client sends an op over the websocket, the server validates

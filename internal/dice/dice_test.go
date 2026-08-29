@@ -13,9 +13,9 @@ import (
 // reproduce the other's random number generator.
 var seq = []int{7, 1, 20, 3, 6, 6, 2, 19, 5, 4, 8, 20, 1, 12, 6, 9, 3, 17, 2, 10}
 
-func seqDraw() Draw {
+func seqDraw() Drawer {
 	i := 0
-	return func(sides, n int) ([]int, error) {
+	return DrawFunc(func(sides, n int) ([]int, error) {
 		out := make([]int, n)
 		for k := 0; k < n; k++ {
 			v := seq[i%len(seq)]
@@ -23,7 +23,7 @@ func seqDraw() Draw {
 			out[k] = (v-1)%sides + 1
 		}
 		return out, nil
-	}
+	})
 }
 
 type diceCase struct {
