@@ -1,11 +1,5 @@
-.venv/
-__pycache__/
-*.pyc
-data/
-
-# PyInstaller output
-build/
-dist/
-
 # cross-compiled binaries
 dist/
+
+# a data folder kept beside the binary for a portable install
+data/

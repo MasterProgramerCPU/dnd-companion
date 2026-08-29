@@ -28,6 +28,12 @@ and no background daemon anywhere — the app is up while you have it open.
 | `-url` | `DND_URL` | override the address in the QR code |
 | `-no-open` | | don't open the DM console at startup |
 
+To have it on your PATH rather than run it out of a folder:
+
+```
+go build -o ~/.local/bin/dnd-companion ./cmd/dnd-companion
+```
+
 **Where campaigns live.** A `data/` folder sitting next to the binary wins, which is
 what makes a portable copy — app and campaigns in one folder — work when you move it
 to another machine. Otherwise they go to the per-user location: `%LOCALAPPDATA%\DnDCompanion`
@@ -240,19 +246,20 @@ with the web assets, fonts and 3D dice compiled in. `go:embed` puts them *inside
 executable, so there is no unpack directory, nothing to extract at startup, and no way
 for the app and its assets to get separated.
 
-### The tests are a translation of the Python
+### The dice and the rules are pinned to recorded vectors
 
-This started as a Python app, and the two pieces most able to break quietly in a
-port — the dice expression parser and the 5e derived-stat maths — are pinned against
-it rather than rewritten by eye. `tools/gen_vectors.py` records what the Python
-actually did for 51 dice expressions and 15 character sheets into `testdata/`, and the
-Go tests replay them demanding identical output, down to the error strings.
+This began as a Python app. The two pieces most able to break quietly in a rewrite —
+the dice expression parser and the 5e derived-stat maths — were not translated by eye:
+what the original actually did for 51 dice expressions and 15 character sheets was
+recorded into `testdata/`, and the tests demand identical output down to the error
+strings. The Python is gone now, so those files are no longer a comparison against
+another implementation — they are the specification. See `testdata/README.md`.
 
-That caught two real bugs immediately. Python's `//` rounds toward negative infinity
-where Go's `/` truncates toward zero, so a Charisma of 3 has to give -4 and not -3 —
-and every modifier on every sheet runs through that division. And a dice term's printed
-label is built by walking its modifiers in written order, so they are an ordered slice
-here; a Go map would have shuffled `4d6r1kh3` at random.
+It caught two real bugs immediately. Ability modifiers must round toward negative
+infinity, so a Charisma of 3 gives -4 and not -3 — Go's `/` truncates toward zero, and
+every modifier on every sheet runs through that division. And a dice term's printed
+label is built by walking its modifiers in written order, so they are held in a slice;
+a Go map would have shuffled `4d6r1kh3` at random.
 
 ### Windows notes
 
@@ -315,9 +322,7 @@ web/         compiled into the binary with go:embed
   js/dm.js      DM console
   fonts/        Cinzel + Alegreya Sans (SIL OFL), vendored to work offline
   vendor/dice-box/  @3d-dice/dice-box + its assets, vendored to work offline
-testdata/    golden vectors recorded from the original Python implementation
-tools/       the generator that produced them
-server/      the original Python implementation, kept as the reference
+testdata/    recorded dice and rules vectors the tests are pinned to
 ```
 
 State changes go one way: a client sends an op over the websocket, the server validates

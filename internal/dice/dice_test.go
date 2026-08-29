@@ -8,9 +8,9 @@ import (
 	"testing"
 )
 
-// The same fixed sequence tools/gen_vectors.py draws from, so a Go roll and a
-// Python roll of the same formula are comparable without either side having to
-// reproduce the other's random number generator.
+// The fixed sequence the golden vectors were recorded against, so a roll here
+// is comparable to the recorded one without imitating another implementation's
+// random number generator. Duplicated in testdata/README.md — change both.
 var seq = []int{7, 1, 20, 3, 6, 6, 2, 19, 5, 4, 8, 20, 1, 12, 6, 9, 3, 17, 2, 10}
 
 func seqDraw() Drawer {

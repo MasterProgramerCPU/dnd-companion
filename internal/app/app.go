@@ -45,27 +45,17 @@ type Options struct {
 // when they move it to another machine. Otherwise campaigns go to the per-user
 // location the OS guarantees is writable, so the app works when it is run from
 // a Downloads folder.
+// It is the executable's own directory that is checked, deliberately not the
+// working directory: which folder you happen to have cd'd into must never
+// silently change which campaigns the app opens.
 func DefaultDataDir() string {
-	for _, base := range candidateDirs() {
-		if base == "" {
-			continue
-		}
-		if _, err := os.Stat(filepath.Join(base, "data", "registry.db")); err == nil {
-			return filepath.Join(base, "data")
+	if exe, err := os.Executable(); err == nil {
+		beside := filepath.Join(filepath.Dir(exe), "data")
+		if _, err := os.Stat(filepath.Join(beside, "registry.db")); err == nil {
+			return beside
 		}
 	}
 	return filepath.Join(userDataRoot(), AppName)
-}
-
-func candidateDirs() []string {
-	var out []string
-	if exe, err := os.Executable(); err == nil {
-		out = append(out, filepath.Dir(exe))
-	}
-	if cwd, err := os.Getwd(); err == nil {
-		out = append(out, cwd)
-	}
-	return out
 }
 
 func userDataRoot() string {

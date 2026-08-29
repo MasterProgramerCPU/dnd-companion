@@ -1,8 +1,8 @@
 // Package dndcompanion holds the web assets, compiled into the binary.
 //
-// This is the whole reason the Go build has no equivalent of the Python
-// version's paths.py: there is no unpack directory and no "where did my
-// assets go" question, because the files are in the executable itself.
+// Everything the browser needs — pages, scripts, styles, fonts and the 3D dice —
+// lives inside the executable. There is no unpack directory, nothing to extract
+// at startup, and no way for the app and its assets to get separated.
 package dndcompanion
 
 import "embed"
