@@ -1,55 +1,54 @@
 # D&D Table Companion
 
-A LAN app for in-person 5e games. It runs on your PC; everyone at the table opens it on
-their phone and gets a live character sheet, shared dice, the initiative order, and the
-party's stash. No accounts, no internet, no cloud — just your Wi-Fi.
+A self-hosted LAN app for **in-person** 5e games. It runs on a laptop at the table;
+everyone scans a QR code and gets a live character sheet, shared 3D dice, the
+initiative order, handouts and the party's loot on their own phone.
 
-## Running it
+No accounts, no signup, no cloud, no internet. One binary and your Wi-Fi.
 
-One binary, no installer, no runtime to install first. Start it and the table is
-live; close it and the session is over. Nothing is left running in the background
-and there is nothing to uninstall.
-
-```
-./dnd-companion            # Linux / macOS
-```
-
-On Windows, double-click **dnd-companion-windows-amd64.exe**. Either way you get a
-window with the join QR code in it, the DM console opens in your browser, and
-closing the window (or Ctrl-C) stops the server.
-
-That is deliberately the same on every platform. There is no service, no autostart
-and no background daemon anywhere — the app is up while you have it open.
-
-| flag | environment | what it does |
-| --- | --- | --- |
-| `-port` | `DND_PORT` | listen somewhere other than 8787 |
-| `-data` | `DND_DATA_DIR` | keep campaigns somewhere other than the default |
-| `-url` | `DND_URL` | override the address in the QR code |
-| `-no-open` | | don't open the DM console at startup |
-
-To have it on your PATH rather than run it out of a folder:
+It is not a virtual tabletop and not a Foundry replacement — there is no battle map
+and no tokens. It is for the game you are already playing around a real table, where
+the only thing missing is that everyone's character sheet is on paper and the DM is
+the only one who knows whose turn it is.
 
 ```
-go build -o ~/.local/bin/dnd-companion ./cmd/dnd-companion
+                          ┌──────────────┐
+   phones on the Wi-Fi    │  your laptop │
+   ┌────┐ ┌────┐ ┌────┐   │              │
+   │ PC │ │ PC │ │ PC │◄──┤ one binary   │
+   └────┘ └────┘ └────┘   │ one SQLite   │
+      player  player      │ file per     │
+                          │ campaign     │
+   ┌────────┐             │              │
+   │   DM   │◄────────────┤              │
+   └────────┘             └──────────────┘
 ```
 
-**Where campaigns live.** A `data/` folder sitting next to the binary wins, which is
-what makes a portable copy — app and campaigns in one folder — work when you move it
-to another machine. Otherwise they go to the per-user location: `%LOCALAPPDATA%\DnDCompanion`
-on Windows, `~/.local/share/DnDCompanion` on Linux, `~/Library/Application Support/DnDCompanion`
-on macOS. The startup banner always prints the exact path it chose.
+## Quick start
 
-Campaign files are recorded by name rather than by full path, so a data folder can be
-copied between machines — and between Linux and Windows — and still opens.
+Grab the binary for your platform from
+[Releases](../../releases), or build it (Go 1.22+, nothing else):
+
+```
+go build -o dnd-companion ./cmd/dnd-companion
+./dnd-companion
+```
+
+On Windows, double-click the `.exe`. Either way you get the join QR code, the DM
+console opens in your browser, and **closing the window stops the server** — there is
+no service, no autostart and nothing left running afterwards.
+
+Everyone must be on the same Wi-Fi. On Windows, allow the app through the firewall on
+**Private networks** when it asks; see [Windows notes](#windows-notes) if phones can't
+connect.
 
 ## How a session goes
 
 1. **You start the app.** It prints a QR code and the join URL:
 
    ```
-     Players join at:  http://192.168.171.132:8787
-     DM console:       http://192.168.171.132:8787/dm
+     Players join at:  http://192.168.1.20:8787
+     DM console:       http://192.168.1.20:8787/dm
    ```
 
 2. **You build the party.** Open `/dm` and add a character for each
@@ -63,14 +62,8 @@ copied between machines — and between Linux and Windows — and still opens.
 
 4. **They're in.** Their phone remembers them, so next session they just open the link.
 
-The DM console isn't locked. Anyone on the Wi-Fi can open `/dm` — there's a confirmation
-so nobody lands there by fat-fingering the link, but that's a guard against accidents,
-not a lock. It runs on trust, which is the right call at a table where you can all see
-each other; just don't expose the port to anything wider.
-
-Each campaign is one SQLite file under `data/` — back that file up and you've backed up
-the campaign, delete it and it's gone. `data/registry.db` is the short list of which
-campaigns exist and which one is being played.
+Each campaign is a single SQLite file. Copy that file and you have backed up the
+campaign; delete it and it's gone.
 
 ## What players get
 
@@ -229,22 +222,62 @@ screen, marked with a blue edge. No banner fires on anyone's phone. Good for per
 failed.
 
 
-## Building
+## Running it
 
-Go's cross-compiler does the whole matrix from whichever machine you happen to be
-sitting at. The SQLite driver is pure Go, so `CGO_ENABLED=0` holds and there is no
-C toolchain, no Windows machine and no CI runner in the loop:
+Start it and the table is live; close it and the session is over. Nothing is installed
+and nothing keeps running in the background.
+
+| flag | environment | what it does |
+| --- | --- | --- |
+| `-port` | `DND_PORT` | listen somewhere other than 8787 |
+| `-data` | `DND_DATA_DIR` | keep campaigns somewhere other than the default |
+| `-url` | `DND_URL` | override the address in the QR code |
+| `-no-open` | | don't open the DM console at startup |
+| `-version` | | print the version and exit |
+
+**Where campaigns live.** A `data/` folder sitting next to the binary wins, which is
+what makes a portable copy — app and campaigns in one folder — work when you move it to
+another machine. Otherwise they go to the per-user location:
+
+| | |
+| --- | --- |
+| Windows | `%LOCALAPPDATA%\DnDCompanion` |
+| Linux | `~/.local/share/DnDCompanion` (or `$XDG_DATA_HOME`) |
+| macOS | `~/Library/Application Support/DnDCompanion` |
+
+The startup banner always prints the exact path it chose. Campaign files are recorded by
+name rather than by full path, so a data folder can be copied between machines — and
+between Linux and Windows — and still opens.
+
+To put it on your PATH rather than run it out of a folder:
 
 ```
-./build.sh          # windows, linux and macOS — amd64 and arm64 — into dist/
-go build ./cmd/dnd-companion    # just this machine
-go test ./...
+go build -o ~/.local/bin/dnd-companion ./cmd/dnd-companion
 ```
 
-A build takes about half a minute for all six targets and each binary is around 15MB
-with the web assets, fonts and 3D dice compiled in. `go:embed` puts them *inside* the
-executable, so there is no unpack directory, nothing to extract at startup, and no way
-for the app and its assets to get separated.
+## How it works
+
+State changes go one way. A client sends an op over the websocket, the server validates
+it against that device's role, writes SQLite, and broadcasts the affected slice to
+everyone connected. Nothing is trusted from the client.
+
+The DM's view and the players' view of the same slice are rendered **from the same data
+with different redactions**, computed server-side. A player's phone is never sent a
+hidden monster's hit points and told not to draw them — it is never sent them at all.
+That is why `internal/state` has both an `Initiative` and an `InitiativeForPlayers`, and
+why handouts you have written but not pushed cannot be found by a curious player poking
+at the websocket.
+
+Derived numbers — proficiency bonus, save and skill bonuses, passive Perception, spell
+save DC — are computed on the server, so two clients can never disagree about what a
+character's Stealth bonus is.
+
+**The dice are the interesting part.** The 3D dice are real physics, and dice-box reads
+each die's value by ray-casting the settled mesh; there is no way to hand it a
+predetermined result. So the phone throws the dice and reports the faces, and the server
+does all the arithmetic: keep-highest/lowest, advantage, exploding, rerolls, modifiers,
+the log. It validates what comes back — a d6 reporting a 9 is refused, a roll can only
+be cashed in once, and one player cannot cash in another's.
 
 ### The dice and the rules are pinned to recorded vectors
 
@@ -253,7 +286,8 @@ the dice expression parser and the 5e derived-stat maths — were not translated
 what the original actually did for 51 dice expressions and 15 character sheets was
 recorded into `testdata/`, and the tests demand identical output down to the error
 strings. The Python is gone now, so those files are no longer a comparison against
-another implementation — they are the specification. See `testdata/README.md`.
+another implementation — they are the specification. See
+[`testdata/README.md`](testdata/README.md).
 
 It caught two real bugs immediately. Ability modifiers must round toward negative
 infinity, so a Charisma of 3 gives -4 and not -3 — Go's `/` truncates toward zero, and
@@ -261,10 +295,47 @@ every modifier on every sheet runs through that division. And a dice term's prin
 label is built by walking its modifiers in written order, so they are held in a slice;
 a Go map would have shuffled `4d6r1kh3` at random.
 
+## Trust model
+
+**Read this before putting it on anything but your own home Wi-Fi.**
+
+Nothing here is authenticated. Anyone who can reach the port can join as a player or
+open the DM console — there is a confirmation on `/dm` so nobody lands there by
+fat-fingering a link, but that is a guard against accidents, not a lock.
+
+That is a deliberate trade for a living room where everyone can see each other, and the
+wrong one everywhere else. **Do not port-forward it, do not expose it to the internet,
+and do not run it on a network you do not control.**
+
+The dice are thrown on the phone rather than the server, so a player who edits their
+browser's JavaScript could report a face their die did not land on. At a table where
+everyone can see each other that is no worse than palming a physical die, but it does
+mean this is not a tamper-proof roller.
+
+Uploaded handout pictures are served to anyone who can reach the port and guess the
+filename, which is a content hash.
+
+## Building
+
+Go's cross-compiler does the whole matrix from whichever machine you happen to be
+sitting at. The SQLite driver is pure Go, so `CGO_ENABLED=0` holds and there is no C
+toolchain, no Windows machine and no CI runner in the loop:
+
+```
+./build.sh          # windows, linux and macOS — amd64 and arm64 — into dist/
+go build ./cmd/dnd-companion    # just this machine
+go test ./...
+```
+
+All six targets take about half a minute, and each binary is around 15MB with the web
+assets, fonts and 3D dice compiled in. `go:embed` puts them *inside* the executable, so
+there is no unpack directory, nothing to extract at startup, and no way for the app and
+its assets to get separated.
+
 ### Windows notes
 
-Two things get in the way once, and both are Windows being careful rather than
-anything being wrong.
+Two things get in the way once, and both are Windows being careful rather than anything
+being wrong.
 
 **SmartScreen** will say "Windows protected your PC", because the executable isn't
 code-signed — a certificate is a yearly expense a LAN dice roller doesn't justify.
@@ -281,24 +352,12 @@ a LAN app "just doesn't work" on Windows.
 
 **If the QR points somewhere unreachable**, the app has guessed the wrong adapter. It
 asks the OS which interface reaches the internet, and on a machine with Hyper-V, WSL,
-VirtualBox or a VPN that can be a virtual one the phones cannot see. Compare the
-address in the banner against `ipconfig`, and if they disagree, say which one is right:
+VirtualBox or a VPN that can be a virtual one the phones cannot see. Compare the address
+in the banner against `ipconfig`, and if they disagree, say which one is right:
 
 ```
-dnd-companion-windows-amd64.exe -url http://192.168.1.42:8787
+dnd-companion.exe -url http://192.168.1.42:8787
 ```
-
-## Notes
-
-- Everyone must be on the same Wi-Fi. If phones can't reach the PC, it's almost always
-  the firewall: allow inbound TCP 8787.
-- Handout pictures live in `uploads/` inside the data folder, named by content hash.
-- Fonts, dice and every other asset are compiled into the binary and served from it, so
-  the app looks and behaves identically with the router unplugged from the internet.
-- Nothing here is locked. Anyone on your Wi-Fi with the URL can join as a player or open
-  the DM console, and the dice are thrown on the phone rather than the server. That's the
-  right trade for a living room and the wrong one for anywhere else — don't expose the
-  port to the internet.
 
 ## Layout
 
@@ -320,12 +379,26 @@ web/         compiled into the binary with go:embed
   js/common.js  transport, DOM helpers, dice pad, roll log
   js/player.js  character sheet and player tabs
   js/dm.js      DM console
-  fonts/        Cinzel + Alegreya Sans (SIL OFL), vendored to work offline
+  fonts/        Cinzel + Alegreya Sans, vendored to work offline
   vendor/dice-box/  @3d-dice/dice-box + its assets, vendored to work offline
 testdata/    recorded dice and rules vectors the tests are pinned to
 ```
 
-State changes go one way: a client sends an op over the websocket, the server validates
-it against that device's role, writes SQLite, and broadcasts the affected slice to
-everyone. Nothing is trusted from the client, and the DM's view and the players' view of
-the same slice are rendered from the same data with different redactions.
+## Third-party
+
+Vendored so the app works with the router unplugged:
+
+- [@3d-dice/dice-box](https://fantasticdice.games) v1.1.4 — MIT
+- [Cinzel](https://fonts.google.com/specimen/Cinzel) and
+  [Alegreya Sans](https://fonts.google.com/specimen/Alegreya+Sans) — SIL Open Font License
+
+Go dependencies: [modernc.org/sqlite](https://modernc.org/sqlite) (pure-Go SQLite, which
+is what makes cross-compiling work), [gorilla/websocket](https://github.com/gorilla/websocket),
+[skip2/go-qrcode](https://github.com/skip2/go-qrcode).
+
+## Licence
+
+MIT — see [LICENSE](LICENSE). Vendored assets keep their own licences, listed above.
+
+*Dungeons & Dragons and D&D are trademarks of Wizards of the Coast. This is an
+unaffiliated fan-made tool and ships no rules text or other copyrighted content.*
