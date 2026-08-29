@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14100e">
+<title>Join the table</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100dvh; }
+  main { width: 100%; max-width: 440px; padding: 20px 16px 40px; }
+  .brand { text-align: center; margin-bottom: 20px; }
+  .brand .d { font-size: 44px; }
+  .brand h1 { font-size: 24px; color: var(--gold); }
+  .pick {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 11px 12px; margin-bottom: 8px; cursor: pointer; text-align: left;
+  }
+  .pick .swatch { width: 10px; height: 34px; border-radius: 3px; flex: none; }
+  .pick .nm { font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">
+    <div class="d">🎲</div>
+    <h1 id="campaign">Loading…</h1>
+    <div class="muted tiny" id="tagline">Pick your character to join the table</div>
+  </div>
+
+  <div id="roster"></div>
+
+  <div class="center tiny" style="margin-top:18px">
+    <a href="#" id="dm-link">I'm the DM →</a>
+  </div>
+</main>
+
+<script src="/static/js/common.js"></script>
+<script>
+(async () => {
+  const lobby = await api('/api/lobby');
+  $('#campaign').textContent = lobby.campaign.name;
+  document.title = `Join · ${lobby.campaign.name}`;
+
+  const enter = (payload, dest) => api('/api/join', { method: 'POST', body: payload })
+    .then(r => { localStorage.setItem('dnd_token', r.token); location.href = dest; })
+    .catch(e => toast(e.message, 'error'));
+
+  const roster = $('#roster');
+  if (!lobby.roster.length) {
+    $('#tagline').textContent = 'Waiting on the DM';
+    roster.append(el('div', { class: 'card center muted tiny' },
+      'The DM hasn\'t added the party yet. Once they create your character it will show up here — pull to refresh.'));
+  }
+  for (const c of lobby.roster) {
+    roster.append(el('button', {
+      class: 'pick',
+      onclick: () => enter({ role: 'player', character_id: c.id, display_name: c.player || c.name }, '/play'),
+    },
+      el('i', { class: 'swatch', style: `background:${c.color}` }),
+      el('span', { class: 'grow' },
+        el('div', { class: 'nm' }, c.name),
+        el('div', { class: 'muted tiny' },
+          [c.klass && `${c.klass} ${c.level}`, c.player && `played by ${c.player}`].filter(Boolean).join(' · ') || 'no class set'),
+      ),
+      c.claimed ? el('span', { class: 'chip tiny' }, 'joined') : null,
+      el('span', { class: 'muted' }, '›'),
+    ));
+  }
+
+  // The DM may add characters while players are staring at this screen.
+  setInterval(async () => {
+    try {
+      const fresh = await api('/api/lobby');
+      if (fresh.roster.length !== lobby.roster.length) location.reload();
+    } catch { /* server restarting; try again next tick */ }
+  }, 4000);
+
+  $('#dm-link').onclick = (e) => {
+    e.preventDefault();
+    // No pin — the DM console runs on trust. The confirm is only here so a
+    // player who fat-fingers the link doesn't land in it by accident.
+    modal('Run the game?', (close) => el('div', {},
+      el('div', { class: 'muted tiny', style: 'margin-bottom:12px' },
+        'The DM console shows hidden monsters, secret rolls and everything you '
+        + 'haven\'t revealed. Only open it if you\'re running the game.'),
+      el('div', { class: 'row' },
+        el('button', { class: 'btn grow', onclick: close }, 'Cancel'),
+        el('button', {
+          class: 'btn gold grow',
+          onclick: () => enter({ role: 'dm', display_name: 'DM' }, '/dm'),
+        }, "I'm the DM"))));
+  };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14100e">
+<title>Character</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+<header class="top">
+  <i class="dot"></i>
+  <div class="grow" style="min-width:0">
+    <div class="title">…</div>
+    <div class="who muted"></div>
+  </div>
+</header>
+
+<main>
+  <section class="tab-panel" data-tab="sheet"></section>
+  <section class="tab-panel" data-tab="dice"></section>
+  <section class="tab-panel" data-tab="combat"></section>
+  <section class="tab-panel" data-tab="party"></section>
+  <section class="tab-panel" data-tab="loot"></section>
+  <section class="tab-panel" data-tab="progress"></section>
+  <section class="tab-panel" data-tab="log"><div class="card"><h3>Roll log</h3><div id="log"></div></div></section>
+</main>
+
+<nav class="tabbar">
+  <button data-tab="sheet"><span class="ico">🛡️</span>Sheet</button>
+  <button data-tab="dice"><span class="ico">🎲</span>Dice</button>
+  <button data-tab="combat"><span class="ico">⚔️</span>Fight</button>
+  <button data-tab="party"><span class="ico">👥</span>Party</button>
+  <button data-tab="loot"><span class="ico">🎒</span>Loot</button>
+  <button data-tab="progress"><span class="ico">🗺️</span>Map</button>
+  <button data-tab="log"><span class="ico">📜</span>Log</button>
+</nav>
+
+<script src="/static/js/dice3d.js"></script>
+<script src="/static/js/dicebox.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/sheet.js"></script>
+<script src="/static/js/player.js"></script>
+</body>
+</html>
