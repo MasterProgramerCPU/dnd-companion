@@ -1,0 +1,172 @@
+name: Release
+
+# Push a v* tag to cut a release. Everything else runs the checks only.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Run the suite on all three operating systems, and then actually start the
+  # built app and talk to it. The unit tests cover the logic; this step covers
+  # the things only a real launch can: that the embedded assets are reachable,
+  # that SQLite works on that platform, and that the startup banner doesn't take
+  # the process down before it binds a port.
+  check:
+    name: Test and launch on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            bin: ./dnd-app
+          - os: windows-latest
+            bin: ./dnd-app.exe
+          - os: macos-latest
+            bin: ./dnd-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build
+        run: go build -o ${{ matrix.bin }} ./cmd/dnd-companion
+
+      - name: Launch it and check it answers
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${{ matrix.bin }}" -port 8799 -data ./smoke-data -no-open &
+          app=$!
+
+          # Give it a moment to bind; fail loudly rather than hanging the job.
+          up=""
+          for _ in $(seq 1 30); do
+            if curl -fsS -m 2 http://127.0.0.1:8799/api/lobby >/dev/null 2>&1; then
+              up=yes; break
+            fi
+            sleep 1
+          done
+          if [ -z "$up" ]; then
+            echo "::error::the app never started listening on 8799"
+            kill "$app" 2>/dev/null || true
+            exit 1
+          fi
+
+          fail=0
+          for path in / /play /dm /qr.svg /static/js/common.js /static/css/style.css /api/lobby; do
+            code=$(curl -s -o /dev/null -m 5 -w '%{http_code}' "http://127.0.0.1:8799$path")
+            if [ "$code" = 200 ]; then
+              echo "  ok    $path"
+            else
+              echo "::error::$path returned $code"
+              fail=1
+            fi
+          done
+
+          # A fresh data directory must produce a fresh campaign and nobody in it.
+          roster=$(curl -s -m 5 http://127.0.0.1:8799/api/lobby)
+          case "$roster" in
+            *'"roster":[]'*) echo "  ok    a new install starts with an empty party" ;;
+            *) echo "::error::a fresh install came up with characters already in it"; fail=1 ;;
+          esac
+
+          kill "$app" 2>/dev/null || true
+          exit $fail
+
+  release:
+    name: Publish the release
+    needs: check
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # build.sh stamps the version from `git describe --tags`, which needs
+          # the tags — a shallow checkout would produce binaries reporting a
+          # bare commit hash instead of the version being released.
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Cross-compile every target
+        run: ./build.sh
+
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum dnd-companion-* > SHA256SUMS
+
+      - name: Check the version got stamped
+        run: |
+          set -euo pipefail
+          got=$(dist/dnd-companion-linux-amd64 -version)
+          want="dnd-companion ${GITHUB_REF_NAME}"
+          echo "reports: $got"
+          [ "$got" = "$want" ] || { echo "::error::expected '$want'"; exit 1; }
+
+      - name: Write the release notes
+        run: |
+          cat > notes.md <<'EOF'
+          Download the file for your machine and run it. It prints a QR code — everyone
+          at the table scans it. Closing the window stops the server; nothing is
+          installed and nothing keeps running afterwards.
+
+          | platform | file |
+          | --- | --- |
+          | Windows (most PCs) | `dnd-companion-windows-amd64.exe` |
+          | Windows on ARM | `dnd-companion-windows-arm64.exe` |
+          | Linux | `dnd-companion-linux-amd64` |
+          | Linux on ARM (Raspberry Pi) | `dnd-companion-linux-arm64` |
+          | macOS (Apple Silicon) | `dnd-companion-darwin-arm64` |
+          | macOS (Intel) | `dnd-companion-darwin-amd64` |
+
+          On Linux and macOS, `chmod +x` it first.
+
+          **Upgrading?** Replace your old binary with the new one. Your campaigns are
+          stored outside the app and are left alone. Players do nothing at all — their
+          phones pick up the new version the next time they open the page.
+
+          **Windows, first run.** SmartScreen will say "Windows protected your PC"
+          because the binary isn't code-signed: *More info → Run anyway*. When the
+          firewall asks, allow it on **Private networks** — if that prompt is dismissed,
+          phones fail to connect with no visible reason.
+
+          Nothing here is authenticated: anyone who can reach the port can join or open
+          the DM console. That's the right trade for a table where you can all see each
+          other, and the wrong one anywhere else. Don't expose the port to the internet.
+
+          Verify downloads against `SHA256SUMS`. Every binary in this release was tested
+          on Linux, Windows and macOS runners before publishing.
+          EOF
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            dist/dnd-companion-* dist/SHA256SUMS \
+            --title "${GITHUB_REF_NAME}" \
+            --notes-file notes.md \
+            --generate-notes

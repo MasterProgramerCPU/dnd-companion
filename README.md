@@ -332,6 +332,25 @@ assets, fonts and 3D dice compiled in. `go:embed` puts them *inside* the executa
 there is no unpack directory, nothing to extract at startup, and no way for the app and
 its assets to get separated.
 
+### Releasing
+
+Tag it and push; GitHub Actions does the rest.
+
+```
+git tag -a v0.2.0 -m "what's new"
+git push origin v0.2.0
+```
+
+The workflow runs the tests and then *actually launches the built app* on Linux,
+Windows and macOS runners — checking that the embedded assets are reachable, that
+SQLite works there, and that a fresh install comes up with an empty party — before
+cross-compiling all six binaries, checksumming them and publishing the release.
+Nothing is published unless every platform passed.
+
+Users upgrade by replacing their binary; their campaigns live outside it and are left
+alone. Players do nothing at all — their phones pick up the new version the next time
+they open the page, because the app shell is served `no-cache`.
+
 ### Windows notes
 
 Two things get in the way once, and both are Windows being careful rather than anything
