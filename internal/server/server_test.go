@@ -3,6 +3,7 @@ package server_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -214,16 +215,28 @@ func TestPlayerJoinRequiresRealCharacter(t *testing.T) {
 	}
 }
 
-func TestUnknownTokenIsRejected(t *testing.T) {
+// A stale token must be closed with 4401 specifically: the frontend keys off
+// that exact code to clear the token and send the player back to the join
+// screen. Any other code leaves them in a reconnect loop instead.
+func TestUnknownTokenIsClosedWith4401(t *testing.T) {
 	ts, _ := harness(t)
 	url := "ws" + strings.TrimPrefix(ts.URL, "http") + "/ws?token=nonsense"
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		return // refused outright is fine too
+		t.Fatalf("dial: %v", err)
 	}
 	defer conn.Close()
+
 	conn.SetReadDeadline(time.Now().Add(3 * time.Second))
-	if _, _, err := conn.ReadMessage(); err == nil {
-		t.Error("expected the connection to be closed for an unknown token")
+	_, _, err = conn.ReadMessage()
+	if err == nil {
+		t.Fatal("expected the connection to be closed for an unknown token")
+	}
+	var ce *websocket.CloseError
+	if !errors.As(err, &ce) {
+		t.Fatalf("closed with %v, want a websocket close error", err)
+	}
+	if ce.Code != 4401 {
+		t.Errorf("close code %d, want 4401 (the frontend keys off it to re-join)", ce.Code)
 	}
 }
