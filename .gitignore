@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 data/
+
+# PyInstaller output
+build/
+dist/

@@ -4,10 +4,11 @@ A LAN app for in-person 5e games. It runs on your PC; everyone at the table open
 their phone and gets a live character sheet, shared dice, the initiative order, and the
 party's stash. No accounts, no internet, no cloud — just your Wi-Fi.
 
-## Keeping it running
+## Keeping it running (Linux)
 
-It's installed as a systemd **user** service, so it starts with the machine and comes
-straight back if it ever falls over:
+On the machine this was built on it's installed as a systemd **user** service, so it
+starts with the machine and comes straight back if it ever falls over. Windows works
+differently — see [Windows](#windows), where the app runs only while its window is open:
 
 ```
 systemctl --user status dnd-companion     # is it up?
@@ -208,6 +209,74 @@ screen, marked with a blue edge. No banner fires on anyone's phone. Good for per
 failed.
 
 
+## Windows
+
+Windows gets a different shape from the Linux box: not a service, just an app.
+Double-click **DnD Table Companion.exe** and a small window opens with the join
+QR code in it — that's what the players scan. Close the window and the server
+stops. Nothing is installed, nothing keeps running in the background, and there
+is nothing to uninstall afterwards.
+
+Campaigns are written to `%LOCALAPPDATA%\DnDCompanion\` rather than next to the
+executable, so the app runs from wherever it was downloaded to and a new build
+can replace the old one without touching anyone's game. The **Campaign files**
+button opens that folder; back up `campaigns\` and you've backed up the
+campaigns.
+
+### First launch
+
+Two things get in the way once, and both are Windows being careful rather than
+anything being wrong.
+
+**SmartScreen** will say "Windows protected your PC", because the executable
+isn't code-signed — a certificate is a yearly expense a LAN dice roller doesn't
+justify. **More info → Run anyway.**
+
+**The firewall prompt** matters more, and it's the one thing that will stop
+phones connecting. Windows asks whether to allow the app to communicate: tick
+**Private networks** and allow it. If that prompt gets dismissed or denied,
+phones fail to connect with no visible reason. The fix is to set the Wi-Fi
+network's profile to **Private** (Settings → Network & Internet → Wi-Fi → your
+network) and then re-allow the app under Windows Defender Firewall → *Allow an
+app through firewall*. A network marked **Public** blocks this no matter what
+the app asks for, and that is the single most common reason a LAN app "just
+doesn't work" on Windows.
+
+### If the QR points somewhere unreachable
+
+The app finds its own address by asking the OS which interface reaches the
+internet. On a machine with Hyper-V, WSL, VirtualBox or a VPN installed, that
+can be a virtual adapter the phones can't see, and the QR then encodes an
+address that goes nowhere. Compare the address in the window against
+`ipconfig`, and if they disagree, say which one is right:
+
+```
+set DND_URL=http://192.168.1.42:8787
+"DnD Table Companion.exe"
+```
+
+`DND_PORT` and `DND_DATA_DIR` work exactly as they do on Linux.
+
+### Building it
+
+PyInstaller cannot cross-compile, so the executable has to be built on Windows.
+`.github/workflows/build-windows.yml` does that on a hosted runner: run it from
+the Actions tab for a downloadable build, or push a `v*` tag to attach one to a
+release. It smoke-tests the bundle before publishing, which catches what this
+kind of packaging fails at most often — an asset or a uvicorn backend that never
+made it into the build, and would otherwise surface as a broken app at somebody
+else's table.
+
+On a Windows machine directly:
+
+```
+uv sync
+uv run --with pyinstaller pyinstaller --noconfirm packaging/dnd-companion.spec
+```
+
+From a checkout you don't need to build at all: `.\run.ps1` runs it from source,
+and `.\run.ps1 --window` opens the same window the built app uses.
+
 ## Notes
 
 - Everyone must be on the same Wi-Fi. If phones can't reach the PC, it's almost always
@@ -230,6 +299,8 @@ server/
   state.py   the JSON slices pushed to clients (DM and player variants)
   dice.py    dice expression parser and roller
   hub.py     websocket fan-out
+  paths.py   where data and bundled assets live, in a checkout and when frozen
+  desktop.py the window the Windows build opens in place of a terminal
 web/
   index.html join screen        player.html  player app       dm.html  DM console
   js/sheet.js   the 5e sheet, shared by the player's view and the DM's
@@ -240,6 +311,7 @@ web/
 vendor/dice-box/  @3d-dice/dice-box + its assets, vendored to work offline
   js/player.js  character sheet and player tabs
   js/dm.js      DM console
+packaging/  PyInstaller spec and entry point for the Windows executable
 ```
 
 State changes go one way: a client sends an op over the websocket, the server validates

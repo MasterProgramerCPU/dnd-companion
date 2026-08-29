@@ -11,7 +11,11 @@ import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
-DATA_DIR = Path(os.environ.get("DND_DATA_DIR") or Path(__file__).resolve().parent.parent / "data")
+from . import paths
+
+# A frozen build unpacks its code to a scratch directory that is wiped on exit,
+# so this must never be anchored to __file__. See server/paths.py.
+DATA_DIR = Path(os.environ.get("DND_DATA_DIR") or paths.default_data_dir())
 UPLOADS_DIR = DATA_DIR / "uploads"
 CAMPAIGNS_DIR = DATA_DIR / "campaigns"
 REGISTRY_PATH = DATA_DIR / "registry.db"

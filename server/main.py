@@ -10,6 +10,7 @@ import json
 import os
 import secrets
 import socket
+import sys
 import time
 from pathlib import Path
 
@@ -18,13 +19,13 @@ from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import db, state
+from . import db, paths, state
 from . import dice
 from .dice import DiceError, evaluate as dice_evaluate, parse as dice_parse
 from .dice import MAX_DICE, plan as dice_plan, roll as roll_dice
 from .hub import Client, hub
 
-WEB = Path(__file__).resolve().parent.parent / "web"
+WEB = paths.bundled("web")
 CONDITIONS = [
     "blinded", "charmed", "deafened", "frightened", "grappled", "incapacitated",
     "invisible", "paralyzed", "petrified", "poisoned", "prone", "restrained",
@@ -974,19 +975,42 @@ APP_URL = ""
 
 
 def banner() -> None:
+    """Print the join QR. Best effort, and deliberately unable to fail: the QR
+    is drawn from half-block glyphs, and a Windows console with output
+    redirected encodes as cp1252, which cannot represent them. Losing the
+    picture is a nuisance; taking the server down before it binds a port
+    because nobody could see the picture is not acceptable."""
     import io
 
     import qrcode
 
-    qr = qrcode.QRCode(border=1)
-    qr.add_data(APP_URL)
-    buf = io.StringIO()
-    qr.print_ascii(out=buf, invert=True)
-    print(buf.getvalue())
-    print(f"  Players join at:  {APP_URL}")
-    print(f"  DM console:       {APP_URL}/dm")
-    print(f"  Playing:          {db.campaign_name()}  ({db.DB_PATH})")
-    print("\n  Ctrl-C to stop.\n", flush=True)  # flush: stdout is block-buffered when piped
+    if sys.stdout is None:  # a windowed build has no stdout at all
+        return
+
+    lines = []
+    try:
+        qr = qrcode.QRCode(border=1)
+        qr.add_data(APP_URL)
+        buf = io.StringIO()
+        qr.print_ascii(out=buf, invert=True)
+        lines.append(buf.getvalue())
+    except Exception:
+        pass
+    lines.append(f"  Players join at:  {APP_URL}")
+    lines.append(f"  DM console:       {APP_URL}/dm")
+    lines.append(f"  Playing:          {db.campaign_name()}  ({db.DB_PATH})")
+    lines.append("\n  Ctrl-C to stop.\n")
+    text = "\n".join(lines)
+
+    encoding = getattr(sys.stdout, "encoding", None) or "ascii"
+    try:
+        text.encode(encoding)
+    except UnicodeEncodeError:
+        text = "\n".join(lines[1:])  # drop the QR, keep the URL that matters
+    try:
+        print(text, flush=True)  # flush: stdout is block-buffered when piped
+    except Exception:
+        pass
 
 
 def main() -> None:
@@ -994,7 +1018,22 @@ def main() -> None:
     import uvicorn
 
     db.init_registry()
+    # lan_ip() picks the interface with the default route, which on a Windows
+    # box with Hyper-V, WSL or a VPN adapter may not be the one the phones are
+    # on. DND_URL is the override when the QR points somewhere unreachable.
     APP_URL = os.environ.get("DND_URL") or f"http://{lan_ip()}:{PORT}"
+
+    # A frozen build has no console to print to and no Ctrl-C to press, so it
+    # gets a window instead. --window forces the same from a checkout, and
+    # --no-window forces it off, which is how a build gets smoke-tested on a
+    # machine with no desktop to open a window on.
+    windowed = (paths.FROZEN or "--window" in sys.argv) and "--no-window" not in sys.argv
+    if windowed:
+        from .desktop import run_windowed
+
+        run_windowed(app, APP_URL, PORT, db.campaign_name(), db.DATA_DIR)
+        return
+
     banner()
     uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="warning")
 
