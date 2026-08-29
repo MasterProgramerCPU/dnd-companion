@@ -1,0 +1,2477 @@
+[
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 2,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "default",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 1,
+      "name": "Default",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": -1,
+      "mods": {
+        "cha": -4,
+        "con": 0,
+        "dex": -1,
+        "int": 1,
+        "str": -2,
+        "wis": 2
+      },
+      "passive_investigation": 11,
+      "passive_perception": 12,
+      "prof_bonus": 3,
+      "saves": {
+        "cha": -4,
+        "con": 0,
+        "dex": -1,
+        "int": 1,
+        "str": -2,
+        "wis": 2
+      },
+      "skills": {
+        "acrobatics": -1,
+        "animal_handling": 2,
+        "arcana": 1,
+        "athletics": -2,
+        "deception": -4,
+        "history": 1,
+        "insight": 2,
+        "intimidation": -4,
+        "investigation": 1,
+        "medicine": 2,
+        "nature": 1,
+        "perception": 2,
+        "performance": -4,
+        "persuasion": -4,
+        "religion": 1,
+        "sleight_of_hand": -1,
+        "stealth": -1,
+        "survival": 2
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "odd_scores",
+    "sheet": {
+      "abilities": {
+        "cha": 3,
+        "con": 11,
+        "dex": 9,
+        "int": 13,
+        "str": 7,
+        "wis": 15
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 5,
+      "name": "Odd Scores",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 10,
+      "mods": {
+        "cha": -4,
+        "con": 5,
+        "dex": 10,
+        "int": -1,
+        "str": -5,
+        "wis": 0
+      },
+      "passive_investigation": 9,
+      "passive_perception": 10,
+      "prof_bonus": 6,
+      "saves": {
+        "cha": -4,
+        "con": 5,
+        "dex": 10,
+        "int": -1,
+        "str": -5,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 10,
+        "animal_handling": 0,
+        "arcana": -1,
+        "athletics": -5,
+        "deception": -4,
+        "history": -1,
+        "insight": 0,
+        "intimidation": -4,
+        "investigation": -1,
+        "medicine": 0,
+        "nature": -1,
+        "perception": 0,
+        "performance": -4,
+        "persuasion": -4,
+        "religion": -1,
+        "sleight_of_hand": 10,
+        "stealth": 10,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "extremes",
+    "sheet": {
+      "abilities": {
+        "cha": 2,
+        "con": 20,
+        "dex": 30,
+        "int": 8,
+        "str": 1,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 20,
+      "name": "Extremes",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 5,
+      "mods": {
+        "cha": 0,
+        "con": 3,
+        "dex": 2,
+        "int": 5,
+        "str": -1,
+        "wis": 1
+      },
+      "passive_investigation": 19,
+      "passive_perception": 15,
+      "prof_bonus": 4,
+      "saves": {
+        "cha": 0,
+        "con": 7,
+        "dex": 6,
+        "int": 9,
+        "str": -1,
+        "wis": 1
+      },
+      "skills": {
+        "acrobatics": 2,
+        "animal_handling": 1,
+        "arcana": 13,
+        "athletics": -1,
+        "deception": 0,
+        "history": 5,
+        "insight": 1,
+        "intimidation": 0,
+        "investigation": 9,
+        "medicine": 1,
+        "nature": 5,
+        "perception": 5,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 5,
+        "sleight_of_hand": 2,
+        "stealth": 10,
+        "survival": 1
+      },
+      "spell_attack": 9,
+      "spell_save_dc": 17
+    },
+    "name": "full_caster",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 16,
+        "dex": 14,
+        "int": 20,
+        "str": 8,
+        "wis": 12
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 3,
+      "inspiration": false,
+      "klass": "",
+      "level": 11,
+      "name": "Full Caster",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": true,
+        "dex": true,
+        "int": true,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 2,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 1,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 1,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 2,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "int",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 2,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_1",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 1,
+      "name": "Level 1",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 2,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_4",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 4,
+      "name": "Level 4",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 3,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_5",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 5,
+      "name": "Level 5",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 3,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_8",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 8,
+      "name": "Level 8",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 4,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_9",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 9,
+      "name": "Level 9",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 4,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_12",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 12,
+      "name": "Level 12",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 5,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_13",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 13,
+      "name": "Level 13",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 5,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_16",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 16,
+      "name": "Level 16",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 6,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_17",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 17,
+      "name": "Level 17",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 6,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "level_20",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 20,
+      "name": "Level 20",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 0,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  },
+  {
+    "derived": {
+      "initiative": 0,
+      "mods": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "passive_investigation": 10,
+      "passive_perception": 10,
+      "prof_bonus": 2,
+      "saves": {
+        "cha": 0,
+        "con": 0,
+        "dex": 0,
+        "int": 0,
+        "str": 0,
+        "wis": 0
+      },
+      "skills": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 4,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "spell_attack": null,
+      "spell_save_dc": null
+    },
+    "name": "clamped_rank",
+    "sheet": {
+      "abilities": {
+        "cha": 10,
+        "con": 10,
+        "dex": 10,
+        "int": 10,
+        "str": 10,
+        "wis": 10
+      },
+      "ac": 10,
+      "alignment": "",
+      "attacks": [],
+      "background": "",
+      "color": "#c9a227",
+      "conditions": [],
+      "death_saves": {
+        "failures": 0,
+        "successes": 0
+      },
+      "features": "",
+      "gold": {
+        "cp": 0,
+        "ep": 0,
+        "gp": 0,
+        "pp": 0,
+        "sp": 0
+      },
+      "hit_dice": {
+        "die": "d8",
+        "total": 1,
+        "used": 0
+      },
+      "hp": {
+        "current": 10,
+        "max": 10,
+        "temp": 0
+      },
+      "initiative_bonus": 0,
+      "inspiration": false,
+      "klass": "",
+      "level": 1,
+      "name": "Clamped",
+      "notes": "",
+      "player": "",
+      "race": "",
+      "save_prof": {
+        "cha": false,
+        "con": false,
+        "dex": false,
+        "int": false,
+        "str": false,
+        "wis": false
+      },
+      "skill_prof": {
+        "acrobatics": 0,
+        "animal_handling": 0,
+        "arcana": 0,
+        "athletics": 5,
+        "deception": 0,
+        "history": 0,
+        "insight": 0,
+        "intimidation": 0,
+        "investigation": 0,
+        "medicine": 0,
+        "nature": 0,
+        "perception": 0,
+        "performance": 0,
+        "persuasion": 0,
+        "religion": 0,
+        "sleight_of_hand": 0,
+        "stealth": 0,
+        "survival": 0
+      },
+      "speed": 30,
+      "spell": {
+        "ability": "",
+        "prepared": "",
+        "slots": {
+          "1": {
+            "total": 0,
+            "used": 0
+          },
+          "2": {
+            "total": 0,
+            "used": 0
+          },
+          "3": {
+            "total": 0,
+            "used": 0
+          },
+          "4": {
+            "total": 0,
+            "used": 0
+          },
+          "5": {
+            "total": 0,
+            "used": 0
+          },
+          "6": {
+            "total": 0,
+            "used": 0
+          },
+          "7": {
+            "total": 0,
+            "used": 0
+          },
+          "8": {
+            "total": 0,
+            "used": 0
+          },
+          "9": {
+            "total": 0,
+            "used": 0
+          }
+        }
+      },
+      "subclass": ""
+    }
+  }
+]
