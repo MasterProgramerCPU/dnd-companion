@@ -98,6 +98,8 @@ func PartyDefaults() map[string]any {
 		// The journey: places the party has reached, linked by where they
 		// travelled from, so the whole campaign draws as a graph.
 		"journey": map[string]any{"locations": []any{}},
+		// The DM's own creatures. Never sent to players — see state.Party.
+		"bestiary": []any{},
 	}
 }
 

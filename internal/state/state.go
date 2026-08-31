@@ -245,14 +245,18 @@ func JourneyForPlayers(s *store.Store) map[string]any {
 	return map[string]any{"locations": out}
 }
 
-// Party is the shared slices. Players get the journey redacted and only the
-// handouts the DM has actually shown them.
+// Party is the shared slices. Players get the journey redacted, only the
+// handouts the DM has actually shown them, and no bestiary at all.
 func Party(s *store.Store, isDM bool) map[string]any {
 	out := map[string]any{}
 	for key := range store.PartyDefaults() {
 		out[key] = s.Party(key)
 	}
 	if !isDM {
+		// The stat blocks are the DM's preparation. Redacting a monster once it
+		// is on the table would be pointless if its whole entry shipped to every
+		// phone the moment it was written, so it never leaves this branch.
+		delete(out, "bestiary")
 		out["journey"] = JourneyForPlayers(s)
 		shown := []any{}
 		for _, raw := range list(out["handouts"]) {

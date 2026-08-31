@@ -12,6 +12,9 @@ const SheetUI = (() => {
 const ABILITY_NAMES = { str: 'Strength', dex: 'Dexterity', con: 'Constitution',
   int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' };
 
+const PASSIVE_SKILLS = [['perception', 'Perception'], ['investigation', 'Investigation'],
+  ['insight', 'Insight']];
+
 const getPath = (obj, path) => path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
 
 /** An input wired to a sheet path; `sync` fills it, `change` pushes it. */
@@ -33,9 +36,32 @@ function bound(ctx, path, type = 'str', attrs = {}) {
   return node;
 }
 
+/* A textarea sized to its contents rather than to a guess. Features and notes
+ * run to hundreds of lines on a real character, and reading that through a
+ * 90-pixel window — a scrollbar inside a scrolling page, on a phone — is the
+ * worst of both. Growing the field instead means the page scrolls, once. */
+function autoGrow(node) {
+  // A hidden tab has no layout, so measuring it would collapse the field to
+  // nothing. Leave it for whenever it is shown.
+  if (!node.isConnected || node.scrollHeight === 0) return;
+  node.style.height = 'auto';
+  const borders = node.offsetHeight - node.clientHeight;
+  node.style.height = `${node.scrollHeight + borders}px`;
+}
+
+/* A field built while its tab was hidden could not be measured, so re-measure
+ * whenever a tab is shown. Waiting a frame lets the new layout settle first. */
+on('tab', () => requestAnimationFrame(
+  () => $$('textarea[data-grow]').forEach(autoGrow)));
+
 function boundArea(ctx, path, attrs = {}) {
-  const node = el('textarea', attrs);
+  const { grow = true, ...rest } = attrs;
+  const node = el('textarea', rest);
   node.dataset.bind = path;
+  if (grow) {
+    node.dataset.grow = '1';
+    node.addEventListener('input', () => autoGrow(node));
+  }
   node.addEventListener('change', () => ctx.patch(path, node.value));
   return node;
 }
@@ -56,6 +82,7 @@ function buildIdentity(ctx) {
     el('div', { class: 'grid g2' },
       el('label', { class: 'field' }, el('span', {}, 'Class'), bound(ctx, 'klass')),
       el('label', { class: 'field' }, el('span', {}, 'Level'), bound(ctx, 'level', 'int', { min: 1, max: 20 })),
+      el('label', { class: 'field' }, el('span', {}, 'Subclass'), bound(ctx, 'subclass')),
       el('label', { class: 'field' }, el('span', {}, 'Race'), bound(ctx, 'race')),
       el('label', { class: 'field' }, el('span', {}, 'Background'), bound(ctx, 'background')),
       el('label', { class: 'field' }, el('span', {}, 'Player'), bound(ctx, 'player')),
@@ -124,14 +151,21 @@ function buildVitals(ctx) {
         el('div', { class: 'k' }, 'Initiative'), el('div', { class: 'v' }, derived(ctx, 'initiative', 'sign'))),
       el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Speed'), el('div', { class: 'v' }, bound(ctx, 'speed', 'int', { style: 'text-align:center;border:0;background:none;font-family:Georgia,serif;font-size:22px' }))),
       el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Prof. bonus'), el('div', { class: 'v' }, derived(ctx, 'prof_bonus', 'sign'))),
-      el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Passive perc.'), el('div', { class: 'v' }, derived(ctx, 'passive_perception'))),
       el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Hit dice'),
         el('div', { class: 'v', id: 'hd-text' }, '—')),
+      el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Pass. perc.'), el('div', { class: 'v' }, derived(ctx, 'passive_perception'))),
+      el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Pass. invest.'), el('div', { class: 'v' }, derived(ctx, 'passive_investigation'))),
+      el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Pass. insight'), el('div', { class: 'v' }, derived(ctx, 'passive_insight'))),
     ),
+    buildAdjustments(ctx),
     el('div', { class: 'row', style: 'margin-top:10px;gap:6px' },
       el('label', { class: 'field grow', style: 'margin:0' }, el('span', {}, 'Hit die'), bound(ctx, 'hit_dice.die')),
       el('label', { class: 'field grow', style: 'margin:0' }, el('span', {}, 'Total'), bound(ctx, 'hit_dice.total', 'int')),
       el('label', { class: 'field grow', style: 'margin:0' }, el('span', {}, 'Used'), bound(ctx, 'hit_dice.used', 'int')),
+    ),
+    el('div', { class: 'row', style: 'margin-top:10px' },
+      el('button', { class: 'btn sm grow', onclick: () => restDialog(ctx, 'short') }, '🔥 Short rest'),
+      el('button', { class: 'btn sm gold grow', onclick: () => restDialog(ctx, 'long') }, '🌙 Long rest'),
     ),
     el('div', { style: 'margin-top:12px' },
       el('div', { class: 'row', style: 'margin-bottom:6px' },
@@ -140,6 +174,74 @@ function buildVitals(ctx) {
       el('div', { class: 'row wrap', id: 'cond-chips', style: 'gap:6px' }),
     ),
   );
+}
+
+/* Initiative is Dex for almost everyone and a flat passive bonus is unusual, so
+ * both live behind a disclosure rather than cluttering the vitals. They matter
+ * when they matter: an Intelligence-based investigator, or the Observant feat,
+ * whose +5 to passive Perception no rolled check ever shows. */
+function buildAdjustments(ctx) {
+  const abilitySel = el('select', {},
+    ...Object.entries(ABILITY_NAMES).map(([k, n]) => el('option', { value: k }, n)));
+  abilitySel.dataset.bind = 'initiative_ability';
+  abilitySel.addEventListener('change', () => ctx.patch('initiative_ability', abilitySel.value));
+
+  return el('details', { class: 'adjust' },
+    el('summary', {}, 'Initiative & passive adjustments'),
+    el('div', { class: 'grid g2', style: 'margin-top:8px' },
+      el('label', { class: 'field' }, el('span', {}, 'Initiative from'), abilitySel),
+      el('label', { class: 'field' }, el('span', {}, 'Initiative bonus'),
+        bound(ctx, 'initiative_bonus', 'int')),
+    ),
+    el('div', { class: 'tiny muted', style: 'margin:4px 0 5px' },
+      'Added to the passive score only — not to the check you roll.'),
+    el('div', { class: 'grid g3' },
+      ...PASSIVE_SKILLS.map(([key, label]) =>
+        el('label', { class: 'field', style: 'margin:0' }, el('span', {}, label),
+          bound(ctx, `passive_bonus.${key}`, 'int'))),
+    ),
+  );
+}
+
+/* A rest is the one button that changes most of the sheet at once, so it says
+ * what it is about to do before it does it. The server is what actually applies
+ * the rules — this text only has to match them. */
+const REST_TEXT = {
+  short: {
+    title: 'Take a short rest',
+    verb: 'Short rest',
+    does: [
+      'Gives back anything that recharges on a short rest.',
+      'Returns the partial uses of anything that trickles back — a case die, say.',
+    ],
+    doesnt: 'Hit dice are yours to spend, so this does not spend them for you, ' +
+      'and it does not heal, clear temp HP or restore spell slots.',
+  },
+  long: {
+    title: 'Take a long rest',
+    verb: 'Long rest',
+    does: [
+      'Hit points back to full, and temporary hit points gone.',
+      'Death saves cleared.',
+      'Every spell slot back.',
+      'Half your hit dice back, rounded down — always at least one.',
+      'Everything that recharges on a short or a long rest.',
+    ],
+    doesnt: 'Anything you marked as coming back some other way is left alone, ' +
+      'and exhaustion is free text here, so lower it yourself.',
+  },
+};
+
+function restDialog(ctx, kind) {
+  const t = REST_TEXT[kind];
+  modal(t.title, (close) => el('div', {},
+    el('ul', { class: 'restlist' }, ...t.does.map(line => el('li', {}, line))),
+    el('div', { class: 'tiny muted', style: 'margin-top:8px' }, t.doesnt),
+    el('div', { class: 'row', style: 'margin-top:12px' },
+      el('button', { class: 'btn grow', onclick: close }, 'Cancel'),
+      el('button', { class: `btn grow ${kind === 'long' ? 'gold' : ''}`.trim(),
+        onclick: () => { send('char.rest', { id: ctx.id, kind }); close(); } }, t.verb),
+    )));
 }
 
 function buildAbilities(ctx) {
@@ -157,7 +259,7 @@ function buildAbilities(ctx) {
 }
 
 /** Shared row shape for saving throws and skills. */
-function profRow(ctx, label, abbr, profPath, bonusPath, rollLabel, maxRank) {
+function profRow(ctx, label, abbr, profPath, bonusPath, rollLabel, maxRank, skill) {
   const pip = el('button', { class: 'pip', style: 'padding:0;cursor:pointer' });
   pip.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -170,11 +272,46 @@ function profRow(ctx, label, abbr, profPath, bonusPath, rollLabel, maxRank) {
   const bonus = derived(ctx, bonusPath, 'sign');
   bonus.className = 'bonus';
 
+  // The ability tag doubles as the control for changing it: a skill can be
+  // rolled with a different ability, and this is where you would look for that.
+  const tag = abbr ? el('span', { class: skill ? 'abbr tap' : 'abbr' }, abbr) : null;
+  if (tag && skill) {
+    tag.dataset.skillAbbr = skill;
+    tag.title = 'Roll this with a different ability';
+    tag.addEventListener('click', (e) => { e.stopPropagation(); editSkillAbility(ctx, skill, label); });
+  }
+
   return el('div', { class: 'rollrow', onclick: () => ctx.roll(`1d20${sign(getPath(ctx.ch.derived, bonusPath))}`, rollLabel) },
     pip, bonus,
     el('span', { class: 'lbl' }, label),
-    abbr ? el('span', { class: 'abbr' }, abbr) : null,
+    tag,
   );
+}
+
+/* The Dungeon Master's Guide lets a skill be rolled with an ability other than
+ * its usual one — Nature with Wisdom for someone who learned it by living in it
+ * rather than reading about it. The server derives the bonus either way. */
+function editSkillAbility(ctx, skill, label) {
+  const standard = S.skills[skill];
+  const current = (ctx.ch.sheet.skill_ability || {})[skill] || standard;
+  modal(label, (close) => {
+    const pick = (ability) => {
+      const next = { ...(ctx.ch.sheet.skill_ability || {}) };
+      if (ability === standard) delete next[skill]; else next[skill] = ability;
+      ctx.patch('skill_ability', next);
+      close();
+    };
+    return el('div', {},
+      el('div', { class: 'tiny muted', style: 'margin-bottom:10px' },
+        `Normally ${ABILITY_NAMES[standard]}. Pick another if this character is `
+        + 'allowed to roll it with something else.'),
+      el('div', { class: 'grid g3' },
+        ...Object.entries(ABILITY_NAMES).map(([k, n]) => el('button', {
+          class: `btn ${k === current ? 'gold' : ''}`.trim(), onclick: () => pick(k),
+        }, n, k === standard ? el('div', { class: 'tiny muted' }, 'usual') : null))),
+      el('div', { class: 'row', style: 'margin-top:12px' },
+        el('button', { class: 'btn grow', onclick: close }, 'Cancel')));
+  });
 }
 
 function buildSaves(ctx) {
@@ -189,7 +326,8 @@ function buildSkills(ctx) {
   const card = el('div', { class: 'card' }, el('h3', {}, 'Skills',
     el('span', { class: 'spacer' }), el('span', { class: 'tiny muted' }, 'tap pip: prof → expertise')));
   for (const [skill, abil] of Object.entries(S.skills)) {
-    card.append(profRow(ctx, titleCase(skill), abil, `skill_prof.${skill}`, `skills.${skill}`, titleCase(skill), 2));
+    card.append(profRow(ctx, titleCase(skill), abil, `skill_prof.${skill}`,
+      `skills.${skill}`, titleCase(skill), 2, skill));
   }
   return card;
 }
@@ -237,6 +375,127 @@ function editAttack(ctx, index) {
   });
 }
 
+/* ------------------------------------------------------- class resources */
+
+/* Ki, rage, bardic inspiration, superiority dice, a detective's case dice: a
+ * pool with a size, a spend, and a rest that gives it back. Spending goes
+ * through char.resource rather than a sheet patch, so two people tapping the
+ * same pip at once can't overwrite each other's arithmetic — the same reason
+ * damage is a delta. */
+
+const RECHARGE = { long: 'Long rest', short: 'Short rest', other: '' };
+
+function buildResources(ctx) {
+  return el('div', { class: 'card' },
+    el('h3', {}, 'Class resources', el('span', { class: 'spacer' }),
+      el('button', { class: 'btn sm', onclick: () => editResource(ctx, null) }, '+ Add')),
+    el('div', { id: 'res-list' }),
+  );
+}
+
+function syncResources(ctx, root) {
+  const list = $('#res-list', root);
+  if (!list || editing(list)) return;
+  const resources = ctx.ch.sheet.resources || [];
+
+  list.replaceChildren(...resources.map((r, i) => {
+    const max = Math.max(0, Number(r.max) || 0);
+    const used = Math.min(Math.max(0, Number(r.used) || 0), max);
+    const left = max - used;
+    const set = (n) => send('char.resource', { id: ctx.id, res: r.id, set: n });
+
+    const die = (r.die || '').trim();
+    return el('div', { class: 'resource' },
+      el('div', { class: 'row' },
+        el('span', { class: 'grow', onclick: () => editResource(ctx, i) },
+          el('span', {}, r.name || 'Resource'),
+          el('span', { class: 'tiny muted' }, `  ${left}/${max}`,
+            RECHARGE[r.recharge] ? ` · ${RECHARGE[r.recharge]}` : '',
+            Number(r.short_regain) > 0 ? ` · +${r.short_regain} short` : '')),
+        die ? el('button', {
+          class: `btn sm gold ${left ? '' : 'off'}`.trim(),
+          title: left ? `Roll ${die} and spend one` : 'None left',
+          onclick: () => { if (!left) return toast('None left', 'error');
+            set(used + 1); ctx.roll(die, r.name || 'Resource'); },
+        }, die) : null,
+        el('button', { class: 'btn sm', title: 'Restore all', onclick: () => set(0) }, '↺'),
+      ),
+      max ? el('div', { class: 'slotpips', style: 'margin-top:6px' },
+        ...Array.from({ length: max }, (_, j) => el('i', {
+          class: `s ${j < used ? 'used' : ''}`,
+          onclick: () => set(j < used ? j : j + 1),
+        }))) : null,
+    );
+  }));
+  if (!resources.length) {
+    list.append(el('div', { class: 'muted tiny center' },
+      'Nothing tracked. Ki, rage, bardic inspiration, superiority dice…'));
+  }
+}
+
+function editResource(ctx, index) {
+  const sheet = ctx.ch.sheet;
+  const r = index === null
+    ? { id: '', name: '', die: '', max: 1, used: 0, recharge: 'long' }
+    : { ...sheet.resources[index] };
+
+  modal(index === null ? 'New resource' : (r.name || 'Resource'), (close) => {
+    const name = el('input', { value: r.name || '', placeholder: 'Case Dice' });
+    const max = el('input', { type: 'number', inputmode: 'numeric', min: 0, max: 40,
+      value: Math.max(0, Number(r.max) || 0) });
+    const die = el('input', { value: r.die || '', placeholder: 'd8 — optional' });
+    const recharge = el('select', {}, ...Object.entries(RECHARGE).map(([k, label]) =>
+      el('option', { value: k, selected: (r.recharge || 'long') === k }, label || 'Something else')));
+    const shortRegain = el('input', { type: 'number', inputmode: 'numeric', min: 0, max: 40,
+      value: Math.max(0, Number(r.short_regain) || 0) });
+
+    const save = () => {
+      if (!name.value.trim()) return toast('Name it first', 'error');
+      const list = [...(sheet.resources || [])];
+      const next = {
+        // Stable across edits: it is what char.resource addresses a pool by.
+        id: r.id || `r${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`,
+        name: name.value.trim().slice(0, 40),
+        die: die.value.trim().slice(0, 16),
+        max: Math.min(Math.max(0, parseInt(max.value || '0', 10) || 0), 40),
+        used: Math.min(Math.max(0, Number(r.used) || 0),
+          Math.min(Math.max(0, parseInt(max.value || '0', 10) || 0), 40)),
+        recharge: recharge.value,
+        short_regain: Math.min(Math.max(0, parseInt(shortRegain.value || '0', 10) || 0), 40),
+      };
+      if (index === null) list.push(next); else list[index] = next;
+      ctx.patch('resources', list);
+      close();
+    };
+
+    return el('div', {},
+      el('label', { class: 'field' }, el('span', {}, 'Name'), name),
+      el('div', { class: 'grid g2' },
+        el('label', { class: 'field' }, el('span', {}, 'How many'), max),
+        el('label', { class: 'field' }, el('span', {}, 'Die to roll'), die)),
+      el('div', { class: 'grid g2' },
+        el('label', { class: 'field' }, el('span', {}, 'Comes back on'), recharge),
+        el('label', { class: 'field' }, el('span', {}, 'Short rest gives back'), shortRegain)),
+      el('div', { class: 'tiny muted' },
+        'Give it a die and the button rolls it and spends one. Set the short-rest ' +
+        'number for a pool that only trickles back — one case die an hour, not all six.'),
+      index !== null ? el('div', { class: 'row', style: 'margin-top:8px' },
+        el('button', { class: 'btn sm red', onclick: () => {
+          ctx.patch('resources', sheet.resources.filter((_, i) => i !== index));
+          close();
+        } }, 'Remove'),
+      ) : null,
+      el('div', { class: 'row', style: 'margin-top:8px' },
+        el('button', { class: 'btn grow', onclick: close }, 'Cancel'),
+        el('button', { class: 'btn gold grow', onclick: save }, 'Save')));
+  });
+}
+
+/** What a character calls their save DC. Most say spellcasting; some don't. */
+function dcName(sheet) {
+  return (sheet.spell && sheet.spell.label || '').trim() || 'Spellcasting';
+}
+
 function buildSpells(ctx) {
   const abilitySel = el('select', {},
     el('option', { value: '' }, '— none —'),
@@ -244,18 +503,42 @@ function buildSpells(ctx) {
   abilitySel.dataset.bind = 'spell.ability';
   abilitySel.addEventListener('change', () => ctx.patch('spell.ability', abilitySel.value));
 
+  const attackBox = el('div', { class: 'statbox', id: 'dc-attack',
+    onclick: () => { const b = ctx.ch.derived.spell_attack; if (b != null) ctx.roll(`1d20${sign(b)}`, `${dcName(ctx.ch.sheet)} attack`); } },
+    el('div', { class: 'k' }, 'Attack'), el('div', { class: 'v' }, derived(ctx, 'spell_attack', 'sign')));
+
   return el('div', { class: 'card' },
-    el('h3', {}, 'Spellcasting'),
+    el('h3', { id: 'dc-title' }, 'Spellcasting'),
     el('div', { class: 'grid g3' },
       el('label', { class: 'field' }, el('span', {}, 'Ability'), abilitySel),
       el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Save DC'), el('div', { class: 'v' }, derived(ctx, 'spell_save_dc'))),
-      el('div', { class: 'statbox', onclick: () => { const b = ctx.ch.derived.spell_attack; if (b != null) ctx.roll(`1d20${sign(b)}`, 'Spell attack'); } },
-        el('div', { class: 'k' }, 'Attack'), el('div', { class: 'v' }, derived(ctx, 'spell_attack', 'sign'))),
+      attackBox,
     ),
     el('div', { id: 'slot-list', style: 'margin-top:6px' }),
     el('label', { class: 'field', style: 'margin-top:10px' }, el('span', {}, 'Prepared / known'),
       boundArea(ctx, 'spell.prepared', { placeholder: 'Shield, Misty Step, Fireball…' })),
+    el('details', { class: 'adjust', style: 'margin-top:8px' },
+      el('summary', {}, 'Not a spellcaster?'),
+      el('div', { class: 'tiny muted', style: 'margin:6px 0' },
+        'Some classes have a save DC without any spells behind it. Name it here ' +
+        'and it stops calling itself spellcasting; turn off the attack bonus if ' +
+        'there is no roll to make with it.'),
+      el('label', { class: 'field' }, el('span', {}, 'Call this'),
+        bound(ctx, 'spell.label', 'str', { placeholder: 'Spellcasting' })),
+      el('label', { class: 'row tiny', style: 'gap:6px;width:auto;margin-top:6px' },
+        bound(ctx, 'spell.show_attack', 'bool'), 'Show the attack bonus'),
+    ),
   );
+}
+
+/* An attack column is a button when there is something to roll and plain text
+ * when there is not. Leaving it blank used to mean "+0" and "1d4", which quietly
+ * invented a roll for an unarmed strike that deals nothing and for a bomb that
+ * is a saving throw rather than an attack. */
+function rollChip(ctx, formula, wrap, label, cls) {
+  const f = (formula || '').trim();
+  if (!f) return el('span', { class: 'muted tiny', style: 'width:52px;text-align:center' }, '—');
+  return el('button', { class: `btn sm ${cls}`.trim(), onclick: () => ctx.roll(wrap(f), label) }, f);
 }
 
 function buildInventory(ctx) {
@@ -308,15 +591,20 @@ function editCarried(ctx, item, owner = ctx.id) {
 function buildNotes(ctx) {
   return el('div', { class: 'card' },
     el('h3', {}, 'Features & notes'),
-    el('label', { class: 'field' }, el('span', {}, 'Features & traits'), boundArea(ctx, 'features')),
-    el('label', { class: 'field' }, el('span', {}, 'Notes'), boundArea(ctx, 'notes')),
+    el('label', { class: 'field' }, el('span', {}, 'Features & traits'),
+      boundArea(ctx, 'features', { class: 'longtext', placeholder:
+        'Class features, feats, racial traits — whatever you need to reach for mid-session.' })),
+    el('label', { class: 'field' }, el('span', {}, 'Notes'),
+      boundArea(ctx, 'notes', { class: 'longtext', placeholder:
+        'Anything else: personality, appearance, who owes you money.' })),
   );
 }
 
 function buildSheet(ctx) {
   return el('div', { class: 'sheet' },
     buildVitals(ctx), buildAbilities(ctx), buildSaves(ctx), buildSkills(ctx),
-    buildAttacks(ctx), buildSpells(ctx), buildInventory(ctx), buildIdentity(ctx), buildNotes(ctx),
+    buildAttacks(ctx), buildResources(ctx), buildSpells(ctx), buildInventory(ctx),
+    buildIdentity(ctx), buildNotes(ctx),
     // the caller decides what belongs after the sheet itself
     ...(ctx.footer ? [ctx.footer()] : []),
   );
@@ -336,10 +624,18 @@ function syncSheet(ctx, root) {
     const v = getPath(sheet, node.dataset.bind);
     if (node.type === 'checkbox') node.checked = !!v;
     else node.value = v ?? '';
+    if (node.dataset.grow) autoGrow(node);
   }
   for (const node of $$('[data-derive]', root)) {
     const v = getPath(d, node.dataset.derive);
     node.textContent = v == null ? '—' : (node.dataset.fmt === 'sign' ? sign(v) : v);
+  }
+  for (const tag of $$('[data-skill-abbr]', root)) {
+    const skill = tag.dataset.skillAbbr;
+    const ability = (sheet.skill_ability || {})[skill] || S.skills[skill];
+    tag.textContent = ability;
+    // Flag it when it is not the ability the rules would have used.
+    tag.classList.toggle('swapped', ability !== S.skills[skill]);
   }
   for (const pip of $$('[data-prof]', root)) {
     const rank = Number(getPath(sheet, pip.dataset.prof) || 0);
@@ -367,6 +663,11 @@ function syncSheet(ctx, root) {
     });
   }
 
+  // A field is not always measurable at sync time — the DM's sheet is built and
+  // synced before it is placed in its modal, and a hidden tab has no layout at
+  // all — so measure again once the browser has laid this out.
+  requestAnimationFrame(() => $$('textarea[data-grow]', root).forEach(autoGrow));
+
   // Conditions — only the active ones; tap a chip to clear it.
   const chips = $('#cond-chips', root);
   const active = sheet.conditions || [];
@@ -383,11 +684,18 @@ function syncSheet(ctx, root) {
       el('span', { class: 'grow', onclick: () => editAttack(ctx, i) },
         el('div', {}, a.name),
         a.notes ? el('div', { class: 'tiny muted' }, a.notes) : null),
-      el('button', { class: 'btn sm', onclick: () => ctx.roll(`1d20${a.bonus || '+0'}`, `${a.name} attack`) }, a.bonus || '+0'),
-      el('button', { class: 'btn sm gold', onclick: () => ctx.roll(a.damage || '1d4', `${a.name} damage`) }, a.damage || '—'),
+      rollChip(ctx, a.bonus, f => `1d20${f}`, `${a.name} attack`, ''),
+      rollChip(ctx, a.damage, f => f, `${a.name} damage`, 'gold'),
     )));
     if (!(sheet.attacks || []).length) alist.append(el('div', { class: 'muted tiny center' }, 'No attacks yet.'));
   }
+
+  syncResources(ctx, root);
+
+  // The save-DC block: named by the sheet, and the attack hidden when there is
+  // no roll to make with it.
+  $('#dc-title', root).textContent = dcName(sheet);
+  $('#dc-attack', root).classList.toggle('hidden', sheet.spell.show_attack === false);
 
   // Spell slots
   const slots = $('#slot-list', root);

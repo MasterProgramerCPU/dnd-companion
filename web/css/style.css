@@ -227,6 +227,8 @@ button.btn[disabled] { opacity: .4; }
 .grid { display: grid; gap: 8px; }
 .g2 { grid-template-columns: 1fr 1fr; }
 .g3 { grid-template-columns: repeat(3, 1fr); }
+.g4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 420px) { .g4 { grid-template-columns: repeat(2, 1fr); } }
 .g6 { grid-template-columns: repeat(6, 1fr); }
 @media (max-width: 420px) { .g6 { grid-template-columns: repeat(3, 1fr); } }
 
@@ -680,3 +682,46 @@ h3.tap { cursor: pointer; }
 }
 
 .list-item.campaign-active { background: #241d14; border-radius: 8px; padding-left: 8px; }
+
+/* ------------------------------------------------- resources & adjustments */
+
+.resource {
+  padding: 8px 9px; margin-bottom: 7px;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel);
+}
+.resource .grow { cursor: pointer; }
+.btn.off { opacity: .4; }
+
+details.adjust { margin-top: 10px; }
+details.adjust > summary {
+  cursor: pointer; font-size: 11.5px; color: var(--ink-dim);
+  padding: 3px 0; list-style: none;
+}
+details.adjust > summary::-webkit-details-marker { display: none; }
+details.adjust > summary::before { content: '▸ '; }
+details.adjust[open] > summary::before { content: '▾ '; }
+
+.restlist { margin: 0; padding-left: 18px; }
+.restlist li { margin-bottom: 4px; }
+
+/* Features and notes are read far more often than they are written, and on a
+   real character they run long. They size themselves to their contents (see
+   autoGrow), so there is no inner scrollbar to fight and nothing to drag. */
+textarea.longtext {
+  min-height: 240px;
+  font-size: 15px;
+  line-height: 1.62;
+  resize: none;
+}
+
+/* A skill rolled with an ability other than its usual one: the tag is tappable,
+   and marked so the swap is visible rather than a silent difference. */
+.rollrow .abbr.tap { cursor: pointer; padding: 2px 4px; margin: -2px -4px; border-radius: 5px; }
+.rollrow .abbr.swapped { color: var(--gold-soft); background: #c9a2271f; }
+
+/* The DM console carries seven tabs. On a narrow screen the longest labels —
+   BESTIARY next to CAMPAIGN — end up touching, so tighten the tracking there
+   rather than letting them run together. */
+@media (max-width: 520px) {
+  nav.tabbar button { font-size: 8.5px; letter-spacing: .04em; padding: 0 2px; }
+}

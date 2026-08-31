@@ -380,6 +380,126 @@ func (s *Server) opCharHP(c *hub.Client, p payload) error {
 	return s.pushInitiative()
 }
 
+// opCharResource spends or restores a class resource — ki, superiority dice,
+// rage, a detective's case dice. The change is applied as a delta on the server
+// for the same reason damage is: two phones tapping the same pip at once must
+// not overwrite each other's arithmetic.
+func (s *Server) opCharResource(c *hub.Client, p payload) error {
+	id := int64(p.intv("id", 0))
+	if !c.IsDM() && (c.CharacterID == nil || *c.CharacterID != id) {
+		return errors.New("that isn't your character")
+	}
+	sh, _, err := s.loadSheet(id)
+	if err != nil {
+		return err
+	}
+
+	target := p.str("res", "")
+	list, _ := sh["resources"].([]any)
+	for _, raw := range list {
+		r, _ := raw.(map[string]any)
+		if r == nil {
+			continue
+		}
+		if rid, _ := r["id"].(string); rid != target {
+			continue
+		}
+		maxUses := max(0, numOf(r["max"], 0))
+		used := numOf(r["used"], 0) + p.intv("delta", 0)
+		if p.has("set") {
+			used = p.intv("set", 0)
+		}
+		r["used"] = min(max(used, 0), maxUses)
+		break
+	}
+
+	if err := s.saveSheet(id, sh); err != nil {
+		return err
+	}
+	return s.pushCharacters()
+}
+
+// restKind reads the rest a client asked for, defaulting to the cheap one:
+// a stray or malformed message must not wipe a character's whole day.
+func restKind(p payload) string {
+	if p.str("kind", "") == sheet.LongRest {
+		return sheet.LongRest
+	}
+	return sheet.ShortRest
+}
+
+func restName(kind string) string {
+	if kind == sheet.LongRest {
+		return "Long rest"
+	}
+	return "Short rest"
+}
+
+// summarise turns the list of what a rest gave back into one line of table talk.
+func summarise(who, kind string, did []string) string {
+	if len(did) == 0 {
+		return fmt.Sprintf("%s — %s had nothing to recover", restName(kind), who)
+	}
+	const most = 4
+	shown := did
+	if len(shown) > most {
+		shown = append(append([]string{}, did[:most]...),
+			fmt.Sprintf("and %d more", len(did)-most))
+	}
+	return fmt.Sprintf("%s — %s: %s", restName(kind), who, strings.Join(shown, ", "))
+}
+
+// opCharRest rests one character.
+func (s *Server) opCharRest(c *hub.Client, p payload) error {
+	id := int64(p.intv("id", 0))
+	if !c.IsDM() && (c.CharacterID == nil || *c.CharacterID != id) {
+		return errors.New("that isn't your character")
+	}
+	sh, name, err := s.loadSheet(id)
+	if err != nil {
+		return err
+	}
+	kind := restKind(p)
+	did := sheet.Rest(sh, kind)
+	clampHP(sh)
+	if err := s.saveSheet(id, sh); err != nil {
+		return err
+	}
+	// Everyone hears about a rest: it is a scene change, not a private edit.
+	s.Hub.Broadcast("toast", map[string]string{
+		"kind": "announce", "text": summarise(name, kind, did),
+	})
+	if err := s.pushCharacters(); err != nil {
+		return err
+	}
+	return s.pushInitiative()
+}
+
+// opPartyRest rests the whole party at once — the DM saying "you make camp".
+func (s *Server) opPartyRest(c *hub.Client, p payload) error {
+	chars, err := s.Store.Characters()
+	if err != nil {
+		return err
+	}
+	kind := restKind(p)
+	for _, ch := range chars {
+		sheet.Rest(ch.Sheet, kind)
+		clampHP(ch.Sheet)
+		if err := s.Store.SaveCharacter(ch.ID, ch.Name, ch.Sheet); err != nil {
+			return err
+		}
+	}
+	s.Hub.Broadcast("toast", map[string]string{
+		"kind": "announce",
+		"text": fmt.Sprintf("The party takes a %s rest", map[string]string{
+			sheet.LongRest: "long", sheet.ShortRest: "short"}[kind]),
+	})
+	if err := s.pushCharacters(); err != nil {
+		return err
+	}
+	return s.pushInitiative()
+}
+
 func (s *Server) opCharCreate(c *hub.Client, p payload) error {
 	name := p.clamped("name", "New Adventurer", 60)
 	sh := sheet.Default(name, p.clamped("player", "", 60))

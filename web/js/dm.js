@@ -22,6 +22,7 @@ function renderCombat() {
       el('button', { class: 'btn sm', onclick: () => send('init.add_party', { roll: false }) }, '+ Party'),
       el('button', { class: 'btn sm', onclick: () => send('init.add_party', { roll: true }) }, '+ Party (auto-roll)'),
       el('button', { class: 'btn sm', onclick: addMonster }, '+ Monster'),
+      el('button', { class: 'btn sm gold', onclick: addFromBestiary }, '+ From bestiary'),
       el('button', { class: 'btn sm red', onclick: () => confirm('Clear the whole encounter?') && send('init.clear') }, 'Clear'),
     ),
   );
@@ -186,10 +187,13 @@ function renderParty() {
         el('button', { class: 'btn sm red', onclick: () => charHp(c, -1) }, '−'),
         el('button', { class: 'btn sm green', onclick: () => charHp(c, 1) }, '+'),
       ),
-      el('div', { class: 'grid g3', style: 'margin-bottom:6px' },
+      el('div', { class: 'grid g4', style: 'margin-bottom:6px' },
         el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'AC'), el('div', { class: 'v' }, s.ac)),
         el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Pass. perc'), el('div', { class: 'v' }, d.passive_perception)),
-        el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Spell DC'), el('div', { class: 'v' }, d.spell_save_dc ?? '—')),
+        el('div', { class: 'statbox' }, el('div', { class: 'k' }, 'Pass. inv'), el('div', { class: 'v' }, d.passive_investigation)),
+        el('div', { class: 'statbox' },
+          el('div', { class: 'k' }, (s.spell?.label || '').trim() ? `${s.spell.label} DC` : 'Spell DC'),
+          el('div', { class: 'v' }, d.spell_save_dc ?? '—')),
       ),
       el('div', { class: 'tiny muted' }, skillTop),
       el('div', { class: 'tiny muted' }, 'Saves: ' + S.me.abilities.map(a => `${a} ${sign(d.saves[a])}`).join(' ')),
@@ -212,11 +216,35 @@ function renderParty() {
       el('div', { class: 'row', style: 'margin-top:10px' },
         el('button', { class: 'btn sm', onclick: showJoinInfo }, 'Show join QR'),
         el('button', { class: 'btn sm gold', onclick: addCharacter }, '+ Add character'),
+      ),
+      el('div', { class: 'row', style: 'margin-top:8px' },
+        el('button', { class: 'btn sm grow', onclick: () => partyRest('short') }, '🔥 Party short rest'),
+        el('button', { class: 'btn sm gold grow', onclick: () => partyRest('long') }, '🌙 Party long rest'),
       )),
     cards.length
       ? el('div', { class: 'party-grid' }, ...cards)
       : el('div', { class: 'card center muted tiny' }, 'No characters yet.'),
   );
+}
+
+/* "You make camp." Rests every character by the same rules the sheet's own rest
+ * buttons use — the server applies them, so the two can't drift apart. */
+function partyRest(kind) {
+  const long = kind === 'long';
+  modal(long ? 'The party takes a long rest' : 'The party takes a short rest', (close) => el('div', {},
+    el('div', { class: 'tiny muted' },
+      `Rests all ${S.characters.length} ${S.characters.length === 1 ? 'character' : 'characters'}, `
+      + (long
+        ? 'restoring hit points, spell slots, half their hit dice and everything that recharges on a rest.'
+        : 'giving back what a short rest recovers. Nobody is healed and no hit dice are spent.')),
+    el('div', { class: 'tiny muted', style: 'margin-top:6px' },
+      'Everyone sees it happen on their phone.'),
+    el('div', { class: 'row', style: 'margin-top:12px' },
+      el('button', { class: 'btn grow', onclick: close }, 'Cancel'),
+      el('button', { class: `btn grow ${long ? 'gold' : ''}`.trim(),
+        onclick: () => { send('party.rest', { kind }); close(); } },
+        long ? 'Long rest' : 'Short rest'),
+    )));
 }
 
 const CLASSES = ['Artificer', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk',
@@ -840,6 +868,7 @@ function renderDice() {
     renderCombat();
     renderParty();
     renderJourneyTab();
+    renderBestiary();
     renderCampaign();
     renderDice();
     renderLog($('#log'));

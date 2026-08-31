@@ -69,9 +69,48 @@ campaign; delete it and it's gone.
 
 **Sheet** — a full 5e sheet: abilities, saves, all 18 skills with proficiency and
 expertise, AC/speed/initiative, HP with temp HP and death saves, hit dice, spell slots,
-attacks, inventory, coin. Derived numbers (proficiency bonus, save and skill bonuses,
-passive Perception, spell save DC) are computed by the server, so the DM's dashboard and
-the player's phone can never disagree.
+attacks, class resources, inventory, coin. Derived numbers (proficiency bonus, save and
+skill bonuses, the three passive scores, spell save DC) are computed by the server, so
+the DM's dashboard and the player's phone can never disagree.
+
+A few of those numbers refuse to be ordinary, so the sheet lets you say so:
+
+| the character | what you set |
+| --- | --- |
+| has the Observant feat, or anything else that raises what they *notice* without changing the check they roll | a passive bonus, under **Initiative & passive adjustments** — it moves passive Perception, Investigation or Insight and leaves the rolled skill alone |
+| rolls initiative off something other than Dexterity | **Initiative from**, in the same place — the number then tracks that ability by itself |
+| has a save DC but no spells behind it — a monk's ki, a detective's deductions | **Not a spellcaster?** on the spellcasting card: name the DC whatever it really is, and turn off the attack bonus if there is no roll to make with it |
+| rolls a skill with an ability other than its usual one — Nature by living in it rather than studying it | tap the ability tag beside that skill and pick another. The tag lights up so the swap is visible rather than a silent difference. This is the *Dungeon Master's Guide*'s own variant |
+| has an attack with no damage roll, or damage with no attack roll | leave the other box empty — a blank column means "there is nothing to roll here" rather than a phantom `+0` or `1d4` |
+
+**Class resources** — ki, rage, bardic inspiration, superiority dice, a detective's case
+dice. Give a pool a name, a size and optionally a die: you get a row of pips to tap as
+they are spent, a ↺ to hand them all back, and — if it has a die — one button that rolls
+it and spends one in the same tap. Say whether it comes back on a short rest, a long one,
+or some other way entirely; a pool that only trickles back can also name how many uses an
+hour buys, which is what "regain one expended use on a short rest" actually means.
+Spending is applied on the server as a delta, the same way damage is, so two people
+tapping the same pip at once can't overwrite each other.
+
+**Rest** — two buttons under the hit dice, and both say what they will do before they do
+it.
+
+| | a short rest | a long rest |
+| --- | --- | --- |
+| hit points | — | back to full, temp HP gone |
+| death saves | — | cleared |
+| spell slots | — | all back |
+| hit dice | — | half your total back, rounded down, always at least one |
+| resources | short-rest ones, plus the partial trickle | everything that recharges on either rest |
+
+A short rest does **not** spend hit dice for you: how many to burn is the player's
+decision, so it stays a decision. Neither rest touches a resource you marked as coming
+back some other way, and exhaustion is free text here rather than a level the app could
+count down, so that one is still yours.
+
+Whoever rests, the table hears about it — the roll log gets a line naming what came back.
+The DM can also rest the whole party at once from the **Party** tab, which applies the
+same rules to everyone and announces it on every phone.
 
 Tap any modifier, save, skill, or attack to roll it — the result goes to everyone's log
 with the character's name on it.
@@ -158,9 +197,9 @@ and shows up on their phone. Monsters can be marked hidden: players see `???` wi
 or HP until you reveal them, and even visible monsters show players only "bloodied" or
 "near death" rather than exact numbers.
 
-**Party** — build the roster here, and watch it: every PC's HP, AC, passive Perception,
-spell save DC, saves and key skills at a glance, so you can call for a check without
-asking anyone their bonus.
+**Party** — build the roster here, and watch it: every PC's HP, AC, passive Perception
+and Investigation, save DC, saves and key skills at a glance, so you can call for a check
+without asking anyone their bonus.
 
 Tap a character (or **Open sheet**) and their full sheet opens, fully editable — the same
 sheet they see on their phone, not a cut-down version. Edits go both ways live: change
@@ -216,6 +255,29 @@ whatever came before. Hiding a place doesn't break the chain either — anything
 through it re-links to the nearest place the players can see, so they never notice a gap.
 
 There is no map image to upload; the graph is drawn from the places themselves.
+
+**Bestiary** — the DM's own creatures, kept with the campaign. A stat block is
+written the same way a character sheet is — abilities, saving throw proficiencies,
+attacks, traits — and the server derives it with the same code, so a goblin's
+Dexterity save is worked out exactly like a player's. What it leaves out is
+everything only a player has: death saves, hit dice, spell slots, coin, a pack.
+
+What it adds instead:
+
+| | |
+| --- | --- |
+| **challenge rating** | where a sheet has a level. The proficiency bonus follows from it, so a CR 9 creature gets +4 without you inventing a level for it |
+| **hit point formula** | optional. Given `9d8+18`, every copy you add to combat rolls its own hit points, so three of the same creature are three different creatures. Left blank, they all start on the flat number |
+| **hidden by default** | whether players see `???` when it arrives, set once on the creature rather than remembered every time |
+
+Add a batch straight from the library with **To combat**, or from the Combat tab
+with **+ From bestiary** — name, AC, hit points and kind all come across, and you
+can roll one initiative for the whole mob or one each.
+
+None of it is ever sent to a player. The list is dropped from the party state a
+player receives, so a creature written weeks in advance cannot leak from a phone
+before it walks through the door, and the bestiary script is not even loaded on
+the player's page. Each campaign has its own; switching campaigns swaps it too.
 
 **Secret rolls** — flip the 🔒 toggle on the dice pad and the result appears only on your
 screen, marked with a blue edge. No banner fires on anyone's phone. Good for perception checks the party shouldn't know they
@@ -387,7 +449,7 @@ internal/
   server/    HTTP routes, websocket ops, the permission split
   store/     SQLite: the campaign registry, campaign files, accessors
   state/     the JSON slices pushed to clients (DM and player variants)
-  sheet/     the 5e sheet model and derived-stat maths
+  sheet/     the 5e sheet and stat block models, and derived-stat maths
   dice/      dice expression parser and roller
   hub/       websocket fan-out
 web/         compiled into the binary with go:embed
@@ -398,6 +460,7 @@ web/         compiled into the binary with go:embed
   js/common.js  transport, DOM helpers, dice pad, roll log
   js/player.js  character sheet and player tabs
   js/dm.js      DM console
+  js/bestiary.js  the DM's stat blocks — loaded on the DM page only
   fonts/        Cinzel + Alegreya Sans, vendored to work offline
   vendor/dice-box/  @3d-dice/dice-box + its assets, vendored to work offline
 testdata/    recorded dice and rules vectors the tests are pinned to
