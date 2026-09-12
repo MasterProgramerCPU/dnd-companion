@@ -417,6 +417,33 @@ assets, fonts and 3D dice compiled in. `go:embed` puts them *inside* the executa
 there is no unpack directory, nothing to extract at startup, and no way for the app and
 its assets to get separated.
 
+### Installing it for yourself
+
+Two scripts, depending on whether you want *your* copy or *the* copy:
+
+```
+./install.sh        # build this checkout and install it to ~/.local/bin
+./update.sh         # download the latest published release instead
+```
+
+`install.sh` is the one to use while you're working on the app: the web UI is compiled
+into the binary, so editing anything under `web/` changes nothing you can run until it
+has been built again.
+
+`update.sh` needs no Go at all. It asks GitHub for the newest tagged release, downloads
+the one binary for this machine, **checks it against the release's `SHA256SUMS` and
+refuses to install if it doesn't match**, and skips the whole thing if that version is
+already the one you have. `PREFIX=/usr/local/bin` puts it somewhere else, `FORCE=1`
+reinstalls anyway.
+
+Neither one touches a copy that's already running — replacing the file underneath a
+live process does nothing. Close its window and open it again.
+
+For a build that hasn't been tagged, every CI run attaches its binaries: open the run
+on the Actions page and download `dnd-companion-ubuntu-latest`, `-windows-latest` or
+`-macos-latest`. They're kept for 14 days, and only builds that started and answered on
+their own platform get uploaded.
+
 ### Releasing
 
 Tag it and push; GitHub Actions does the rest.
@@ -488,6 +515,9 @@ web/         compiled into the binary with go:embed
   fonts/        Cinzel + Alegreya Sans, vendored to work offline
   vendor/dice-box/  @3d-dice/dice-box + its assets, vendored to work offline
 testdata/    recorded dice and rules vectors the tests are pinned to
+build.sh     cross-compile all six release targets into dist/
+install.sh   build this checkout and install it to ~/.local/bin
+update.sh    download and verify the latest release instead — no Go needed
 ```
 
 ## Third-party

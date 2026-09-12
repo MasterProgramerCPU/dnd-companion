@@ -17,6 +17,10 @@ file underneath it does nothing — so it has to be closed and reopened as well.
 `./build.sh` is the other one: it cross-compiles all six release targets into `dist/`.
 It does not install anything.
 
+`./update.sh` is not for developing at all — it throws away what is in the checkout and
+installs the last **published** release, verified against its `SHA256SUMS`. Reach for it
+to get back to a known-good build, never to see a change you just made.
+
 ## Checks before calling something done
 
 ```

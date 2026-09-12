@@ -115,6 +115,19 @@ jobs:
           kill "$app" 2>/dev/null || true
           exit $fail
 
+      # Keep the binary from every run, not just tagged ones, so getting the
+      # current build onto another machine is a download from the Actions page
+      # rather than a tag and a wait. This comes after the launch check on
+      # purpose: anything you can pull down here has at least started and
+      # answered on its own platform.
+      - name: Keep the binary
+        uses: actions/upload-artifact@v7
+        with:
+          name: dnd-companion-${{ matrix.os }}
+          path: ${{ matrix.bin }}
+          if-no-files-found: error
+          retention-days: 14
+
   release:
     name: Publish the release
     needs: check
