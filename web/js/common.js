@@ -148,19 +148,66 @@ function toast(text, kind = '') {
 
 /* ------------------------------------------------------------ modal */
 
+/* Everything that can hold focus, in the order a Tab press would visit it. */
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), '
+  + 'select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+let modalSeq = 0;
+
+/* A dialog on a phone is dismissed by tapping the backdrop, which is the whole
+ * story on a touch screen. On the DM's laptop it isn't: Escape is the reflex,
+ * Tab must not wander off behind the dialog into the console underneath, and
+ * focus has to come back where it started once the dialog goes away. */
 function modal(title, buildBody, cls = '') {
-  const bg = el('div', { class: 'modal-bg', onclick: e => { if (e.target === bg) bg.remove(); } });
-  const box = el('div', { class: `modal ${cls}`.trim() }, el('h2', {}, title));
-  const close = () => bg.remove();
+  // Where focus was when this opened, so it can be handed back on close.
+  const returnTo = document.activeElement;
+  const heading = el('h2', { id: `modal-title-${++modalSeq}` }, title);
+  const bg = el('div', { class: 'modal-bg', onclick: e => { if (e.target === bg) close(); } });
+  const box = el('div', {
+    class: `modal ${cls}`.trim(), role: 'dialog', 'aria-modal': 'true',
+    'aria-labelledby': heading.id, tabindex: '-1',
+  }, heading);
+
+  const close = () => {
+    document.removeEventListener('keydown', onKey, true);
+    bg.remove();
+    if (returnTo && returnTo.isConnected) returnTo.focus();
+  };
+
+  const onKey = (e) => {
+    // Dialogs can stack — a give-item dialog over the library. Only the one on
+    // top answers, so Escape peels them off one at a time rather than all at once.
+    const stack = $$('.modal-bg');
+    if (stack[stack.length - 1] !== bg) return;
+
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return;
+
+    const stops = $$(FOCUSABLE, box).filter(n => n.offsetParent !== null);
+    if (!stops.length) return;
+    const first = stops[0];
+    const last = stops[stops.length - 1];
+    const at = document.activeElement;
+    // Wrap at either end, and haul focus back in if it has got out already.
+    if (e.shiftKey && (at === first || !box.contains(at))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (at === last || !box.contains(at))) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
   box.append(buildBody(close));
   bg.append(box);
   document.body.append(bg);
+  document.addEventListener('keydown', onKey, true);
+
   // A whole sheet is for reading and poking at, not filling in top to bottom —
-  // focusing its first field would pop the keyboard and scroll it away.
-  if (cls !== 'sheet') {
-    const first = $('input, select, textarea', box);
-    if (first) setTimeout(() => first.focus(), 60);
-  }
+  // focusing its first field would pop the keyboard and scroll it away. The
+  // dialog itself still takes focus, or Tab would resume behind the backdrop.
+  const first = cls === 'sheet' ? null : $('input, select, textarea', box);
+  setTimeout(() => (first || box).focus(), first ? 60 : 0);
   return close;
 }
 
@@ -684,17 +731,66 @@ function renderTrail(host, journey, opts = {}) {
 
 /* ------------------------------------------------------------ tabs */
 
+/* The bar along the bottom shows one panel at a time, which is exactly what a
+ * tablist is, so it is wired up as one: a screen reader says "Loot, tab 5 of
+ * 7" instead of reading a row of anonymous buttons, and on a keyboard the bar
+ * is a single stop that the arrow keys then move along. The roles are attached
+ * here rather than written into player.html and dm.html because both pages
+ * grow tabs from time to time and only one of them would get updated. */
 function setupTabs() {
-  const go = (name) => {
-    $$('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.tab === name));
-    $$('nav.tabbar button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  const tabs = $$('nav.tabbar button');
+  const panels = $$('.tab-panel');
+  $('nav.tabbar')?.setAttribute('role', 'tablist');
+
+  for (const b of tabs) {
+    b.type = 'button';
+    b.id = `tab-${b.dataset.tab}`;
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-controls', `panel-${b.dataset.tab}`);
+    // The label sits in the markup as a bare text node next to the icon. Wrap
+    // it so a very narrow phone can drop the word and keep the icon, and pin
+    // the word to the button as its accessible name so hiding it costs nothing
+    // to anyone listening rather than looking.
+    const text = [...b.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+    if (text) {
+      const label = text.textContent.trim();
+      b.setAttribute('aria-label', label);
+      text.replaceWith(el('span', { class: 'lbl' }, label));
+    }
+  }
+  for (const p of panels) {
+    p.id = `panel-${p.dataset.tab}`;
+    p.setAttribute('role', 'tabpanel');
+    p.setAttribute('aria-labelledby', `tab-${p.dataset.tab}`);
+  }
+
+  const go = (name, moveFocus = false) => {
+    panels.forEach(p => p.classList.toggle('active', p.dataset.tab === name));
+    tabs.forEach((b) => {
+      const on = b.dataset.tab === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      // Roving tabindex: one Tab press reaches the bar, arrows walk it.
+      b.tabIndex = on ? 0 : -1;
+      if (on && moveFocus) b.focus();
+    });
     localStorage.setItem('dnd_tab', name);
     window.scrollTo(0, 0);
     emit('tab', name);
   };
-  $$('nav.tabbar button').forEach(b => b.addEventListener('click', () => go(b.dataset.tab)));
+
+  tabs.forEach((b, i) => {
+    b.addEventListener('click', () => go(b.dataset.tab));
+    b.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: tabs.length - 1 - i }[e.key];
+      if (step === undefined) return;
+      e.preventDefault();
+      go(tabs[(i + step + tabs.length) % tabs.length].dataset.tab, true);
+    });
+  });
+
   const saved = localStorage.getItem('dnd_tab');
-  go($$('.tab-panel').some(p => p.dataset.tab === saved) ? saved : $('.tab-panel').dataset.tab);
+  go(panels.some(p => p.dataset.tab === saved) ? saved : panels[0].dataset.tab);
   return go;
 }
 

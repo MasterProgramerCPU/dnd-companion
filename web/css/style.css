@@ -77,6 +77,22 @@ body::before {
 h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; letter-spacing: .02em; }
 a { color: var(--gold-soft); }
 
+/* Keyboard focus has to be unmissable for the DM driving this from a laptop,
+   without painting a ring around every button the moment a player taps one.
+   :focus-visible is exactly that distinction: the browser only matches it when
+   focus arrived from the keyboard. */
+:focus-visible {
+  outline: 2px solid var(--gold-soft);
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+/* Fields already answer focus with a gold border and a glow — see input:focus
+   below. A second ring on top of that is just noise. */
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
+/* The dialog box itself is focused on open so Tab starts inside it rather than
+   behind the backdrop. That is bookkeeping, not something to draw. */
+.modal:focus, .modal:focus-visible { outline: none; }
+
 /* ---------------------------------------------------------------- chrome */
 
 header.top {
@@ -124,12 +140,17 @@ nav.tabbar {
 nav.tabbar button {
   position: relative; flex: 1; min-width: 0; background: none; border: 0;
   color: var(--ink-dim);
-  font-family: var(--display); font-size: 9px; font-weight: 600;
-  letter-spacing: .1em; text-transform: uppercase;
+  font-family: var(--display); font-size: 10px; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   cursor: pointer; transition: color .18s;
 }
-nav.tabbar button .ico { font-size: 18px; line-height: 1; transition: transform .18s, filter .18s; }
+/* Seven labels across a phone leaves no room for a long one to wrap onto a
+   second line and shove the icon out of the bar. Clip instead. */
+nav.tabbar button .lbl {
+  max-width: 100%; overflow: hidden; text-overflow: clip; white-space: nowrap;
+}
+nav.tabbar button .ico { font-size: 19px; line-height: 1; transition: transform .18s, filter .18s; }
 nav.tabbar button.active { color: var(--gold-soft); }
 nav.tabbar button.active .ico { transform: translateY(-1px) scale(1.08);
   filter: drop-shadow(0 0 6px #c9a22770); }
@@ -720,8 +741,17 @@ textarea.longtext {
 .rollrow .abbr.swapped { color: var(--gold-soft); background: #c9a2271f; }
 
 /* The DM console carries seven tabs. On a narrow screen the longest labels —
-   BESTIARY next to CAMPAIGN — end up touching, so tighten the tracking there
-   rather than letting them run together. */
+   BESTIARY next to CAMPAIGN — end up touching, so give up the tracking first
+   and only then a little of the size: 8.5px uppercase was legible on the bench
+   and not across a lamplit table. */
 @media (max-width: 520px) {
-  nav.tabbar button { font-size: 8.5px; letter-spacing: .04em; padding: 0 2px; }
+  nav.tabbar button { font-size: 9.5px; letter-spacing: 0; padding: 0 2px; gap: 3px; }
+  nav.tabbar button .ico { font-size: 18px; }
+}
+/* Below about 360px there is genuinely no room for both, so keep the icons —
+   which are what anyone is actually aiming at — and drop the words. The tab
+   still announces its name to a screen reader through aria-label. */
+@media (max-width: 359px) {
+  nav.tabbar button .lbl { display: none; }
+  nav.tabbar button .ico { font-size: 22px; }
 }

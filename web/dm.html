@@ -7,7 +7,38 @@
 <title>DM console</title>
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐉</text></svg>">
-<style> main { max-width: 1000px; } </style>
+<style>
+  main { max-width: 1000px; }
+
+  /* The DM is at a laptop, not holding a phone, and the Campaign tab is a wall
+     of cards that have nothing to do with each other: handouts, the item
+     library, loot, quests, NPCs, the treasury, notes. Stacked in one column
+     that meant scrolling past six to reach the seventh, mid-session, which is
+     the worst possible time. Two columns on a laptop, three on a desktop; the
+     cards are untouched and simply pack better.
+
+     Combat stays one column on purpose. Initiative is an ordered list, and an
+     order that runs down one column and back up the next is not an order. */
+  @media (min-width: 1100px) {
+    main { max-width: 1340px; }
+    .tab-panel[data-tab=campaign].active { column-count: 2; column-gap: 13px; }
+    .tab-panel[data-tab=campaign] .card { break-inside: avoid; }
+  }
+  @media (min-width: 1640px) {
+    .tab-panel[data-tab=campaign].active { column-count: 3; }
+  }
+
+  /* The other end of the same problem. The player's tabs are short words that
+     fit a phone at any size; the DM's are BESTIARY and CAMPAIGN, which do not,
+     and a label clipped mid-word reads as broken rather than abbreviated. The
+     console is a laptop screen in practice, so below tablet width keep the
+     icons — which are what you aim at anyway — and let the aria-label on each
+     button carry the name for anyone listening rather than looking. */
+  @media (max-width: 560px) {
+    nav.tabbar button .lbl { display: none; }
+    nav.tabbar button .ico { font-size: 22px; }
+  }
+</style>
 </head>
 <body>
 <header class="top">
