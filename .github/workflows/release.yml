@@ -42,6 +42,31 @@ jobs:
       - name: Vet
         run: go vet ./...
 
+      # CLAUDE.md asks for these two alongside vet and test, so CI should be
+      # what enforces them rather than whoever remembers. Linux only: a Windows
+      # checkout may rewrite line endings, which would have gofmt report every
+      # file in the repo as needing a change.
+      - name: Formatting
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "::error::gofmt would rewrite these files:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      # There is no JS build step and no linter, so nothing else stands between
+      # a stray syntax error and a phone at the table.
+      - name: Check the JavaScript parses
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          fail=0
+          for f in web/js/*.js; do
+            node --check "$f" || { echo "::error::$f does not parse"; fail=1; }
+          done
+          exit $fail
+
       - name: Test
         run: go test ./...
 
