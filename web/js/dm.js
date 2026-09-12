@@ -669,6 +669,7 @@ function renderCampaign() {
 
   host.replaceChildren(
     handoutLibrary(),
+    itemLibrary(),
     lootEditor(),
     listEditor('Quests', 'quests', [['title', 'Title'], ['body', 'Details', 'area']], { toggle: 'status' }),
     listEditor('NPCs', 'npcs', [['name', 'Name'], ['role', 'Role'], ['notes', 'Notes', 'area']]),

@@ -695,3 +695,203 @@ func TestBestiaryDerivesFromCR(t *testing.T) {
 		t.Errorf("Wisdom save = %+d, want +7", d.Saves["wis"])
 	}
 }
+
+// The item library is the DM's preparation, like the bestiary: it never
+// appears in a player's copy of the party state, and a player cannot write
+// to it.
+func TestItemLibraryNeverReachesPlayers(t *testing.T) {
+	ts, st := harness(t)
+
+	dm := post(t, ts, "/api/join", map[string]any{"role": "dm", "display_name": "The DM"})
+	dmConn := dial(t, ts, dm["token"].(string))
+	await(t, dmConn, "snapshot")
+	send(t, dmConn, "char.create", map[string]any{"name": "Vex", "level": 5})
+	await(t, dmConn, "characters")
+	chars, _ := st.Characters()
+
+	send(t, dmConn, "item.save", map[string]any{"item": map[string]any{
+		"name": "Conductor's Whistle", "kind": "Wondrous item, rare",
+		"notes": "a tarnished brass whistle",
+		"desc":  "SPOILER: three blasts calls the ghost train",
+	}})
+	await(t, dmConn, "party")
+
+	player := post(t, ts, "/api/join", map[string]any{
+		"role": "player", "display_name": "Sam", "character_id": chars[0].ID})
+	pConn := dial(t, ts, player["token"].(string))
+
+	snap := await(t, pConn, "snapshot")
+	party, _ := snap["party"].(map[string]any)
+	if party == nil {
+		t.Fatal("player snapshot had no party")
+	}
+	if _, leaked := party["items"]; leaked {
+		t.Error("the player's snapshot carried the item library")
+	}
+	raw, _ := json.Marshal(snap)
+	if bytes.Contains(raw, []byte("Conductor's Whistle")) || bytes.Contains(raw, []byte("SPOILER")) {
+		t.Error("a library item appeared somewhere in the player's snapshot")
+	}
+
+	// And not on the next broadcast either.
+	send(t, dmConn, "item.save", map[string]any{"item": map[string]any{
+		"name": "Flame Tongue", "desc": "SPOILER: it is sentient",
+	}})
+	pushed := await(t, pConn, "party")
+	if _, leaked := pushed["items"]; leaked {
+		t.Error("a party broadcast carried the item library to a player")
+	}
+	raw, _ = json.Marshal(pushed)
+	if bytes.Contains(raw, []byte("Flame Tongue")) {
+		t.Error("a library item leaked in a party broadcast")
+	}
+
+	// A player cannot write one, nor hand one out.
+	send(t, pConn, "item.save", map[string]any{"item": map[string]any{"name": "Mine"}})
+	send(t, pConn, "item.give", map[string]any{"id": "anything", "owner": chars[0].ID})
+	send(t, pConn, "roll", map[string]any{"formula": "1d20", "label": "after"})
+	await(t, pConn, "roll")
+	list, _ := st.Party("items").([]any)
+	if len(list) != 2 {
+		t.Errorf("library has %d items, want 2 — a player wrote to it", len(list))
+	}
+	if loot, _ := st.Party("loot").([]any); len(loot) != 0 {
+		t.Errorf("a player gave themselves %d items", len(loot))
+	}
+}
+
+// Saving, editing and removing a library item, with the id staying put.
+func TestItemSaveEditRemove(t *testing.T) {
+	ts, st := harness(t)
+	dm := post(t, ts, "/api/join", map[string]any{"role": "dm", "display_name": "The DM"})
+	conn := dial(t, ts, dm["token"].(string))
+	await(t, conn, "snapshot")
+
+	send(t, conn, "item.save", map[string]any{"item": map[string]any{
+		"name": "Potion of Healing", "kind": "Potion, common",
+		"notes": "2d4+2", "desc": "an action to drink", "qty": 2,
+	}})
+	await(t, conn, "party")
+
+	list, _ := st.Party("items").([]any)
+	if len(list) != 1 {
+		t.Fatalf("want 1 item, got %d", len(list))
+	}
+	first := list[0].(map[string]any)
+	id, _ := first["id"].(string)
+	if id == "" {
+		t.Fatal("the server did not assign an id")
+	}
+	if qty, _ := first["qty"].(float64); int(qty) != 2 {
+		t.Errorf("qty did not survive the save: %v", first["qty"])
+	}
+
+	// Editing keeps the id and does not append a second item.
+	send(t, conn, "item.save", map[string]any{"item": map[string]any{
+		"id": id, "name": "Potion of Greater Healing", "notes": "4d4+4",
+	}})
+	await(t, conn, "party")
+	list, _ = st.Party("items").([]any)
+	if len(list) != 1 {
+		t.Fatalf("editing added an item: %d present", len(list))
+	}
+	edited := list[0].(map[string]any)
+	if edited["id"] != id {
+		t.Errorf("id changed on edit: %v -> %v", id, edited["id"])
+	}
+	if edited["name"] != "Potion of Greater Healing" || edited["notes"] != "4d4+4" {
+		t.Errorf("edit did not apply: %v", edited)
+	}
+
+	// A nameless item is refused rather than stored blank.
+	send(t, conn, "item.save", map[string]any{"item": map[string]any{"name": "  "}})
+	msg := await(t, conn, "toast")
+	if msg["kind"] != "error" {
+		t.Errorf("a nameless item should be refused, got %v", msg)
+	}
+	list, _ = st.Party("items").([]any)
+	if len(list) != 1 {
+		t.Errorf("a nameless item was stored anyway: %d present", len(list))
+	}
+
+	send(t, conn, "item.remove", map[string]any{"id": id})
+	await(t, conn, "party")
+	list, _ = st.Party("items").([]any)
+	if len(list) != 0 {
+		t.Errorf("remove left %d items", len(list))
+	}
+}
+
+// Giving an item: the player gets ordinary loot carrying the shared note, the
+// DM's own description stays behind, and the library keeps its entry so the
+// same item can be found again.
+func TestItemGive(t *testing.T) {
+	ts, st := harness(t)
+	dm := post(t, ts, "/api/join", map[string]any{"role": "dm", "display_name": "The DM"})
+	dmConn := dial(t, ts, dm["token"].(string))
+	await(t, dmConn, "snapshot")
+	send(t, dmConn, "char.create", map[string]any{"name": "Vex", "level": 5})
+	await(t, dmConn, "characters")
+	chars, _ := st.Characters()
+
+	send(t, dmConn, "item.save", map[string]any{"item": map[string]any{
+		"name": "Flame Tongue", "kind": "Weapon, rare",
+		"notes": "a blackened longsword", "desc": "SPOILER: 2d6 fire once spoken to",
+	}})
+	await(t, dmConn, "party")
+	lib, _ := st.Party("items").([]any)
+	id := lib[0].(map[string]any)["id"].(string)
+
+	send(t, dmConn, "item.give", map[string]any{"id": id, "owner": chars[0].ID})
+	await(t, dmConn, "party")
+
+	loot, _ := st.Party("loot").([]any)
+	if len(loot) != 1 {
+		t.Fatalf("want 1 loot entry, got %d", len(loot))
+	}
+	got := loot[0].(map[string]any)
+	if got["name"] != "Flame Tongue" {
+		t.Errorf("loot entry is named %v", got["name"])
+	}
+	if got["notes"] != "a blackened longsword" {
+		t.Errorf("the shared note did not travel with the item: %v", got["notes"])
+	}
+	if owner, _ := got["owner"].(float64); int64(owner) != chars[0].ID {
+		t.Errorf("item went to owner %v, want %v", got["owner"], chars[0].ID)
+	}
+	// The DM's own description is not part of what was handed over.
+	raw, _ := json.Marshal(got)
+	if bytes.Contains(raw, []byte("SPOILER")) {
+		t.Error("the DM's description was handed over with the item")
+	}
+	// The library still has it: the same item can be found twice.
+	if lib, _ := st.Party("items").([]any); len(lib) != 1 {
+		t.Errorf("giving changed the library: %d items", len(lib))
+	}
+
+	// A quantity on the giving overrides the library's default, and no owner
+	// means the shared pile.
+	send(t, dmConn, "item.give", map[string]any{"id": id, "owner": nil, "qty": 3})
+	await(t, dmConn, "party")
+	loot, _ = st.Party("loot").([]any)
+	if len(loot) != 2 {
+		t.Fatalf("want 2 loot entries, got %d", len(loot))
+	}
+	shared := loot[1].(map[string]any)
+	if qty, _ := shared["qty"].(float64); int(qty) != 3 {
+		t.Errorf("qty override ignored: %v", shared["qty"])
+	}
+	if shared["owner"] != nil {
+		t.Errorf("want the shared pile, got owner %v", shared["owner"])
+	}
+
+	// An item that is not in the library is refused rather than inventing one.
+	send(t, dmConn, "item.give", map[string]any{"id": "nosuchid", "owner": chars[0].ID})
+	msg := await(t, dmConn, "toast")
+	if msg["kind"] != "error" {
+		t.Errorf("giving an unknown item should fail, got %v", msg)
+	}
+	if loot, _ := st.Party("loot").([]any); len(loot) != 2 {
+		t.Errorf("a failed give still added loot: %d entries", len(loot))
+	}
+}

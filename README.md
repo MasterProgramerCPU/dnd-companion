@@ -214,7 +214,8 @@ table. Switching sends every player back to the join screen to pick a character 
 new campaign — you stay signed in — and nothing is lost: switch back and the old
 campaign is exactly as you left it. You can't delete the one you're playing.
 
-**Campaign** — handouts, the loot ledger, quests, NPCs, treasury and notes.
+**Campaign** — handouts, the item library, the loot ledger, quests, NPCs, treasury and
+notes.
 
 **Handouts** work two ways. At the top of the card is a composer for improvising one
 mid-scene: type a title and some text, optionally attach a picture, hit **📣 Push now**
@@ -236,6 +237,28 @@ nobody in particular. Old campaigns that recorded a typed name are converted on 
 start: names that still match a character move to them, anything else falls back to the
 shared pile. Characters that had their own sheet inventory have it folded into the ledger
 too, owned by them — the two lists were describing the same things.
+
+**Item library** — treasure written up ahead of a session and kept with the campaign, so
+the same potion doesn't have to be typed again for the next party that finds one. An item
+has a name, a kind (*Weapon (longsword), rare*), a default quantity, and two separate
+notes — and the split between them is the point:
+
+| | |
+| --- | --- |
+| **item note** | goes with the item. This is what a player reads in their pack |
+| **DM notes** | what it really does, who wants it back, what happens when they work it out. Stays in the library |
+
+**Give** hands one over: pick a character or the shared pile, adjust the quantity, and it
+lands in their pack as ordinary loot — droppable, passable and throw-away-able like
+anything else they carry, with no thread back to the shelf it came off. Your own notes
+stay behind. The library keeps its entry too, so the same item can be found twice.
+
+Ticked by default, **Say so at the table** announces the gift on every phone. Untick it
+and the item simply appears in their pack, for the note slipped to one player.
+
+Like the bestiary, none of it is ever sent to a player: the list is dropped from the party
+state a player receives, so treasure written weeks in advance cannot leak from a phone
+before it is earned, and the script is not loaded on the player's page at all.
 
 **Map** — the journey, and the one bit of the app only you can edit. Add a place, say
 which place it was **reached from**, and give it a status:
@@ -461,6 +484,7 @@ web/         compiled into the binary with go:embed
   js/player.js  character sheet and player tabs
   js/dm.js      DM console
   js/bestiary.js  the DM's stat blocks — loaded on the DM page only
+  js/items.js     the DM's item library — loaded on the DM page only
   fonts/        Cinzel + Alegreya Sans, vendored to work offline
   vendor/dice-box/  @3d-dice/dice-box + its assets, vendored to work offline
 testdata/    recorded dice and rules vectors the tests are pinned to

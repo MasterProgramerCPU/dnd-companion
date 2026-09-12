@@ -257,6 +257,10 @@ func Party(s *store.Store, isDM bool) map[string]any {
 		// is on the table would be pointless if its whole entry shipped to every
 		// phone the moment it was written, so it never leaves this branch.
 		delete(out, "bestiary")
+		// The item library is the same kind of preparation: a player learns
+		// what is in it by being given something out of it, which arrives as
+		// ordinary loot, not by reading the shelf it came off.
+		delete(out, "items")
 		out["journey"] = JourneyForPlayers(s)
 		shown := []any{}
 		for _, raw := range list(out["handouts"]) {

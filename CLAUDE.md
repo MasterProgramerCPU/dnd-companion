@@ -35,8 +35,8 @@ the model to grow.
 
 `internal/state` renders the same data twice, once for the DM and once for players, and
 the redactions are the point: hidden monsters become `???`, visible ones report "bloodied"
-rather than numbers, unrevealed places vanish from the journey, and the bestiary is
-dropped entirely.
+rather than numbers, unrevealed places vanish from the journey, and the bestiary and the
+item library are dropped entirely.
 
 `state.Party` sends **every key of `store.PartyDefaults()`**, so anything added there
 reaches players unless it is explicitly deleted in the `!isDM` branch. Adding DM-only

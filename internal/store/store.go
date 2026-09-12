@@ -100,6 +100,9 @@ func PartyDefaults() map[string]any {
 		"journey": map[string]any{"locations": []any{}},
 		// The DM's own creatures. Never sent to players — see state.Party.
 		"bestiary": []any{},
+		// The DM's item library: treasure prepared ahead of a session and
+		// handed out when it is earned. Never sent to players — see state.Party.
+		"items": []any{},
 	}
 }
 
